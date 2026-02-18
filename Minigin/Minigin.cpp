@@ -15,6 +15,7 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
+#include "Timer.h"
 
 SDL_Window* g_window{};
 
@@ -100,7 +101,20 @@ void dae::Minigin::Run(const std::function<void()>& load)
 
 void dae::Minigin::RunOneFrame()
 {
+	//update timer
+	Timer::GetInstance().Tick();
+
+	//make variables for FixedUpdate
+	const float fixedStep{ 0.03f };
+	float lag{ Timer::GetInstance().GetDeltaTime() };
+
+	//update others
 	m_quit = !InputManager::GetInstance().ProcessInput();
-	SceneManager::GetInstance().Update();
+	do {
+		SceneManager::GetInstance().FixedUpdate(Timer::GetInstance().GetDeltaTime());
+
+		lag -= fixedStep;
+	} while (lag >= fixedStep);
+	SceneManager::GetInstance().Update(Timer::GetInstance().GetDeltaTime());
 	Renderer::GetInstance().Render();
 }

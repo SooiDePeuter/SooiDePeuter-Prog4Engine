@@ -10,23 +10,31 @@
 #include "ResourceManager.h"
 #include "TextObject.h"
 #include "Scene.h"
+#include "Timer.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
 static void load()
 {
+	//load timer
+	auto timer = dae::Timer{};
+
+	//load scene manager
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
 
+	//load background
 	auto go = std::make_unique<dae::GameObject>();
 	go->SetTexture("background.png");
 	scene.Add(std::move(go));
 
+	//load logo
 	go = std::make_unique<dae::GameObject>();
 	go->SetTexture("logo.png");
 	go->SetPosition(358, 180);
 	scene.Add(std::move(go));
 
+	//load text
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 	auto to = std::make_unique<dae::TextObject>("Programming 4 Assignment", font);
 	to->SetColor({ 255, 255, 0, 255 });
@@ -34,7 +42,8 @@ static void load()
 	scene.Add(std::move(to));
 }
 
-int main(int, char*[]) {
+int main(int, char*[]) 
+{
 #if __EMSCRIPTEN__
 	fs::path data_location = "";
 #else
