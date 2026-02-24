@@ -8,8 +8,9 @@ namespace dae
 	public:
 
 		void Tick();
-		Uint64 getTime() const;
-		Uint64 getPreviousTime() const;
+		void Reset();
+		uint64_t getTime() const;
+		uint64_t getPreviousTime() const;
 		float GetDeltaTime() const;
 
 		Timer() = default;
@@ -21,12 +22,12 @@ namespace dae
 
 	private:
 
-		Uint64 m_TotalTime{};
-		Uint64 m_PreviousTime{};
+		uint64_t m_TotalTime{};
+		uint64_t m_PreviousTime{};
 
 		float m_DeltaTime{};
 
-		Uint64 m_invFrequency{ 1 / SDL_GetPerformanceFrequency() };
+		double m_invFrequency{ 0 };
 
 	};
 }

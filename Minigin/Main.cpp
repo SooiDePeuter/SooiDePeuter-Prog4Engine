@@ -8,10 +8,12 @@
 #include "Minigin.h"
 #include "SceneManager.h"
 #include "ResourceManager.h"
-#include "TextObject.h"
+#include "TextComponent.h"
+#include "FPSComponent.h"
 #include "Scene.h"
 #include "Timer.h"
 
+#include <string> 
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -19,6 +21,7 @@ static void load()
 {
 	//load timer
 	auto timer = dae::Timer{};
+	timer.Reset();
 
 	//load scene manager
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
@@ -34,12 +37,23 @@ static void load()
 	go->SetPosition(358, 180);
 	scene.Add(std::move(go));
 
-	//load text
+	//load a font using the provided texture
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-	auto to = std::make_unique<dae::TextObject>("Programming 4 Assignment", font);
-	to->SetColor({ 255, 255, 0, 255 });
-	to->SetPosition(292, 20);
-	scene.Add(std::move(to));
+
+	//text initializer
+	auto goText = std::make_unique<dae::GameObject>();
+
+	//load top text
+	goText->SetPosition(292, 20);
+	goText->AddComponent<dae::TextComponent>(std::string("SooiDePeuter-Prog4Engine"), font, SDL_Color(255, 255, 0, 255));
+	scene.Add(std::move(goText));
+
+	//load fps text
+	goText = std::make_unique<dae::GameObject>();
+	goText->SetPosition(20, 20);
+	goText->AddComponent<dae::TextComponent>(std::string("0 FPS"), font, SDL_Color(255, 255, 255, 255));
+	goText->AddComponent<dae::FPSComponent>();
+	scene.Add(std::move(goText));
 }
 
 int main(int, char*[]) 

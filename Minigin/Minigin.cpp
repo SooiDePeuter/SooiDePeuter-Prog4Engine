@@ -16,6 +16,7 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "Timer.h"
+#include "Timer.cpp" //bad but theres linker errors if not?
 
 SDL_Window* g_window{};
 
@@ -105,7 +106,7 @@ void dae::Minigin::RunOneFrame()
 	Timer::GetInstance().Tick();
 
 	//make variables for FixedUpdate
-	const float fixedStep{ 0.03f };
+	const float fixedStep{ 1000.f };
 	float lag{ Timer::GetInstance().GetDeltaTime() };
 
 	//update others
