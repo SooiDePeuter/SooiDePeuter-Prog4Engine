@@ -13,12 +13,16 @@ bool dae::GameObject::AddChild(GameObject* child)
 {
 	//no checks because it is a helper function
 	m_children.push_back(child);
+
+	return true;
 }
 
 //for hierarchy changes, use SetParent(nullptr)
 bool dae::GameObject::RemoveChild(GameObject* child)
 {
 	std::erase(m_children, child);
+
+	return true;
 }
 
 
@@ -61,12 +65,12 @@ void dae::GameObject::SetTexture(const std::string& filename)
 void dae::GameObject::SetLocalPosition(float x, float y)
 {
 	m_localTransform.SetPosition(x, y, 0.0f);
+	dae::GameObject::SetDirtyFlag(true);
 }
 
-
-dae::GameObject* dae::GameObject::GetParent(GameObject* parent) const
+//parent must be validated/defaulted after use of this function
+dae::GameObject* dae::GameObject::GetParent() const
 {
-	//every gameobject should have a parent, so no check
 	return m_parent;
 }
 
@@ -100,17 +104,19 @@ bool dae::GameObject::SetParent(GameObject* parent)
 	m_parent = parent;
 
 	//set itself as new parents child
-	{
-		m_parent->AddChild(this);
-	}
+	
+	m_parent->AddChild(this);
+	
 
 	//update world transform
 	SetDirtyFlag(true);
+
+	return true;
 }
 
 int dae::GameObject::GetChildCount() const
 {
-	return m_children.size();
+	return (int)m_children.size();
 }
 
 //returns null if out of range
@@ -129,7 +135,14 @@ dae::GameObject* dae::GameObject::GetChildAt(int index) const
 
 void dae::GameObject::UpdatePosition()
 {
-	m_worldTransform.SetPosition(m_parent->GetPosition() + m_localTransform.GetPosition());
+	if (m_parent)
+	{
+		m_worldTransform.SetPosition(m_parent->GetPosition() + m_localTransform.GetPosition());
+	}
+	else
+	{
+		m_worldTransform.SetPosition(m_localTransform.GetPosition());
+	}
 
 	for (GameObject* child : m_children)
 	{

@@ -9,6 +9,7 @@
 #include "SceneManager.h"
 #include "ResourceManager.h"
 #include "TextComponent.h"
+#include "TransformComponent.h"
 #include "FPSComponent.h"
 #include "Scene.h"
 #include "Timer.h"
@@ -34,7 +35,7 @@ static void load()
 	//load logo
 	go = std::make_unique<dae::GameObject>();
 	go->SetTexture("logo.png");
-	go->SetPosition(358, 180);
+	go->SetLocalPosition(358, 180);
 	scene.Add(std::move(go));
 
 	//load a font using the provided texture
@@ -44,13 +45,13 @@ static void load()
 	auto goText = std::make_unique<dae::GameObject>();
 
 	//load top text
-	goText->SetPosition(292, 20);
+	goText->SetLocalPosition(292, 20);
 	goText->AddComponent<dae::TextComponent>(std::string("SooiDePeuter-Prog4Engine"), font, SDL_Color(255, 255, 0, 255));
 	scene.Add(std::move(goText));
 
 	//load fps text
 	goText = std::make_unique<dae::GameObject>();
-	goText->SetPosition(20, 20);
+	goText->SetLocalPosition(20, 20);
 	goText->AddComponent<dae::TextComponent>(std::string("0 FPS"), font, SDL_Color(255, 255, 255, 255));
 	goText->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(goText));

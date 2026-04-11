@@ -28,10 +28,12 @@ void Scene::RemoveAll()
 
 void Scene::FixedUpdate(float deltaTime)
 {
-	for (auto& object : m_objects)
-	{
-		object->FixedUpdate(deltaTime);
-	}
+	deltaTime = NULL; //remove once deltaTime is used
+
+	//for (auto& object : m_objects)
+	//{
+		//???
+	//}
 }
 
 void Scene::Update(float deltaTime)

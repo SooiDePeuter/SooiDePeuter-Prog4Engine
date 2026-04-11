@@ -32,7 +32,10 @@ namespace dae
 
 		const TransformComponent& GetLocalTransform() const { return m_localTransform; }
 		const TransformComponent& GetWorldTransform() const { return m_worldTransform; }
-		glm::vec3 GetPosition() const { return m_worldTransform.GetPosition(); }
+		glm::vec3 GetPosition() const 
+		{
+			return m_worldTransform.GetPosition();
+		}
 
 		void SetTexture(const std::string& filename);
 		void SetLocalPosition(float x, float y);
@@ -43,7 +46,7 @@ namespace dae
 		//Pass all parameters to the constructor without copying them,
 		void AddComponent(Args&&... args)
 		{
-			static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+			static_assert(std::is_base_of_v<BaseComponent, T>, "T must derive from Component");
 
 			T* existingComponent = GetComponent<T>();
 			if (existingComponent != nullptr)
@@ -58,7 +61,7 @@ namespace dae
 		template<typename T>
 		void RemoveComponent(T* component)
 		{
-			static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+			static_assert(std::is_base_of_v<BaseComponent, T>, "T must derive from Component");
 			if (!component) return;
 			if (component->GetOwner() != this) return; //I don't want to be able to delete component from other GO
 			component->m_markedForRemoval = true;
@@ -67,7 +70,7 @@ namespace dae
 		template<typename T>
 		T* GetComponent()
 		{
-			static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+			static_assert(std::is_base_of_v<BaseComponent, T>, "T must derive from Component");
 			for (auto& component : m_components)
 			{
 				//for every component I try to cast it to the type T, if cast success I return it
@@ -97,10 +100,10 @@ namespace dae
 
 		void CleanupRemovedComponents();
 
-		GameObject* GetParent(GameObject* parent) const;
 		bool SetParent(GameObject* parent);
 		int GetChildCount() const;
 		GameObject* GetChildAt(int index) const;
+		GameObject* GetParent() const;
 
 		void UpdatePosition();
 		void SetDirtyFlag(bool flag);
