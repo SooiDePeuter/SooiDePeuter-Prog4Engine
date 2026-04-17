@@ -26,6 +26,8 @@ namespace dae
 		//dirty flag
 		bool m_isPositionOutOfSync{ false };
 
+		std::vector<GameObject*> m_Observers;
+
 	public:
 		void Update(float deltaTime);
 		void Render() const;
@@ -43,7 +45,7 @@ namespace dae
 		//---Componennt interface---
 		//Variadic template https://www.geeksforgeeks.org/cpp/variadic-function-templates-c/
 		template<typename T, typename... Args>
-		//Pass all parameters to the constructor without copying them,
+		//Pass all parameters to the constructor without copying them
 		void AddComponent(Args&&... args)
 		{
 			static_assert(std::is_base_of_v<BaseComponent, T>, "T must derive from Component");
@@ -108,6 +110,29 @@ namespace dae
 		void UpdatePosition();
 		void SetDirtyFlag(bool flag);
 		bool GetDirtyFlag() const;
+
+		float movementSpeed{1.f};
+		void MoveLeft()
+		{
+			SetLocalPosition(GetLocalTransform().GetPosition().x - movementSpeed, GetLocalTransform().GetPosition().y);
+		}
+		void MoveRight()
+		{
+			SetLocalPosition(GetLocalTransform().GetPosition().x + movementSpeed, GetLocalTransform().GetPosition().y);
+		}
+		void MoveUp()
+		{
+			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y + movementSpeed);
+		}
+		void MoveDown()
+		{
+			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y - movementSpeed);
+		}
+
+		void AddObserver(GameObject* observer);
+		void RemoveObserver(GameObject* observer);
+		void PushEvent(GameObject* sender, const std::string& type);
+		void HandleEvent(GameObject* sender, const std::string& type);
 
 		GameObject() = default;
 		~GameObject();

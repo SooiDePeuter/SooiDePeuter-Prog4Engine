@@ -2,9 +2,67 @@
 #include "GameObject.h"
 #include "ResourceManager.h"
 #include "Renderer.h"
+#include "TextComponent.h"
+#include "HealthComponent.h"
+#include "PointsComponent.h"
 #include <cassert>
 #include <algorithm>
 
+
+void dae::GameObject::AddObserver(GameObject* observer)
+{
+	//validation
+	if (observer == nullptr || observer == this)
+	{
+		return;
+	}
+	for (GameObject* listedObserver : m_Observers)
+	{
+		if (listedObserver == observer)
+		{
+			return;
+		}
+	}
+
+	m_Observers.push_back(observer);
+}
+
+void dae::GameObject::RemoveObserver(GameObject* observer)
+{
+	if (observer == nullptr || observer == this)
+	{
+		return;
+	}
+	for (int index{}; index < m_Observers.size(); index++)
+	{
+		if (m_Observers[index] == observer)
+		{
+			m_Observers.erase(m_Observers.begin() + index);
+		}
+	}
+}
+
+void dae::GameObject::PushEvent(GameObject* sender, const std::string& type)
+{
+	for (GameObject* listedObserver : m_Observers)
+	{
+		listedObserver->HandleEvent(sender, type);
+	}
+}
+
+void dae::GameObject::HandleEvent(GameObject* sender, const std::string& type)
+{
+	if (type == "UpdateHealth" && HasComponent<TextComponent>())
+	{
+		TextComponent* component = GetComponent<TextComponent>();
+		component->GetText() = sender->GetComponent<HealthComponent>()->GetHealth();
+	}
+	else if (type == "UpdatePoints" && HasComponent<TextComponent>())
+	{
+		TextComponent* component = GetComponent<TextComponent>();
+		component->GetText() = sender->GetComponent<PointsComponent>()->GetPoints();
+	}
+}
 
 dae::GameObject::~GameObject() = default;
 
@@ -119,7 +177,7 @@ int dae::GameObject::GetChildCount() const
 	return (int)m_children.size();
 }
 
-//returns null if out of range
+//returns nullptr if out of range
 dae::GameObject* dae::GameObject::GetChildAt(int index) const
 {
 	if (index < m_children.size())
@@ -128,7 +186,7 @@ dae::GameObject* dae::GameObject::GetChildAt(int index) const
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 

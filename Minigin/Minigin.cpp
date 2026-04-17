@@ -109,13 +109,17 @@ void dae::Minigin::RunOneFrame()
 	const float fixedStep{ 1000.f };
 	float lag{ Timer::GetInstance().GetDeltaTime() };
 
-	//update others
+	//update input
 	m_quit = !InputManager::GetInstance().ProcessInput();
+
+	//update scene
 	do {
 		SceneManager::GetInstance().FixedUpdate(Timer::GetInstance().GetDeltaTime());
 
 		lag -= fixedStep;
 	} while (lag >= fixedStep);
 	SceneManager::GetInstance().Update(Timer::GetInstance().GetDeltaTime());
+
+	//update renderer
 	Renderer::GetInstance().Render();
 }
