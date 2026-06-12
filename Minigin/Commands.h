@@ -1,5 +1,7 @@
 #pragma once
 #include "GameObject.h"
+#include "PointsComponent.h"
+#include "HealthComponent.h"
 #include <memory>
 
 namespace dae
@@ -103,7 +105,11 @@ namespace dae
 
 		void Execute() override
 		{
-			m_gameObject->MoveDown();
+			if (m_gameObject.get()->GetComponent<PointsComponent>() != NULL)
+			{
+				m_gameObject.get()->GetComponent<PointsComponent>()->SetPoints(
+					m_gameObject.get()->GetComponent<PointsComponent>()->GetPoints() + 10);
+			}
 		}
 	};
 }

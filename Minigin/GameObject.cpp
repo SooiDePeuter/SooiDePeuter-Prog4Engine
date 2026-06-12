@@ -57,12 +57,14 @@ void dae::GameObject::HandleEvent(GameObject* sender, const std::string& type)
 	if (type == "UpdateHealth" && HasComponent<TextComponent>())
 	{
 		TextComponent* component = GetComponent<TextComponent>();
-		component->GetText() = std::to_string(sender->GetComponent<HealthComponent>()->GetHealth());
+		std::string text{ "Player Health: " + std::to_string(sender->GetComponent<HealthComponent>()->GetHealth()) };
+		component->SetText(text);
 	}
 	else if (type == "UpdatePoints" && HasComponent<TextComponent>())
 	{
 		TextComponent* component = GetComponent<TextComponent>();
-		component->GetText() = std::to_string(sender->GetComponent<PointsComponent>()->GetPoints());
+		std::string text{ "Player Points: " + std::to_string(sender->GetComponent<PointsComponent>()->GetPoints()) };
+		component->SetText(text);
 	}
 }
 
