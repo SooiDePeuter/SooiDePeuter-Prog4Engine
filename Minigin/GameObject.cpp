@@ -9,6 +9,8 @@
 #include <algorithm>
 
 
+float dae::GameObject::DeltaTime{ 0.f };
+
 void dae::GameObject::AddObserver(GameObject* observer)
 {
 	//validation
@@ -55,12 +57,12 @@ void dae::GameObject::HandleEvent(GameObject* sender, const std::string& type)
 	if (type == "UpdateHealth" && HasComponent<TextComponent>())
 	{
 		TextComponent* component = GetComponent<TextComponent>();
-		component->GetText() = sender->GetComponent<HealthComponent>()->GetHealth();
+		component->GetText() = std::to_string(sender->GetComponent<HealthComponent>()->GetHealth());
 	}
 	else if (type == "UpdatePoints" && HasComponent<TextComponent>())
 	{
 		TextComponent* component = GetComponent<TextComponent>();
-		component->GetText() = sender->GetComponent<PointsComponent>()->GetPoints();
+		component->GetText() = std::to_string(sender->GetComponent<PointsComponent>()->GetPoints());
 	}
 }
 

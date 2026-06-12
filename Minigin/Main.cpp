@@ -33,64 +33,75 @@ static void load()
 	//load background
 	auto backGround = std::make_unique<dae::GameObject>();
 	backGround->SetTexture("background.png");
-	scene.Add(std::move(backGround));
+	scene.Add(backGround);
 
 	//load decoy 1
 	auto player1 = std::make_unique<dae::GameObject>();
 	player1->SetTexture("Decoy.png");
 	player1->SetLocalPosition(400, 200);
 	player1->AddComponent<dae::HealthComponent>(3);
+	player1->movementSpeed = 100.f;
 	dae::InputManager::GetInstance().BindControllerCommand(
 		dae::ControllerButton::X,
-		dae::ButtonState::Down,
-		new dae::MoveLeft{},
+		dae::ButtonState::Pressed,
+		new dae::MoveLeft{ player1 },
 		0);
 	dae::InputManager::GetInstance().BindControllerCommand(
 		dae::ControllerButton::B,
-		dae::ButtonState::Down,
-		new dae::MoveRight{},
+		dae::ButtonState::Pressed,
+		new dae::MoveRight{ player1 },
 		0);
 	dae::InputManager::GetInstance().BindControllerCommand(
 		dae::ControllerButton::Y,
-		dae::ButtonState::Down,
-		new dae::MoveUp{},
+		dae::ButtonState::Pressed,
+		new dae::MoveUp{ player1 },
 		0);
 	dae::InputManager::GetInstance().BindControllerCommand(
 		dae::ControllerButton::A,
-		dae::ButtonState::Down,
-		new dae::MoveDown{},
+		dae::ButtonState::Pressed,
+		new dae::MoveDown{ player1 },
 		0);
-	scene.Add(std::move(player1));
+	dae::InputManager::GetInstance().BindControllerCommand(
+		dae::ControllerButton::X,
+		dae::ButtonState::Down,
+		new dae::MoveLeft{ player1 },
+		0);
+	dae::InputManager::GetInstance().BindControllerCommand(
+		dae::ControllerButton::X,
+		dae::ButtonState::Down,
+		new dae::MoveLeft{ player1 },
+		0);
+	scene.Add(player1);
 
 	//load decoy 2
 	auto player2 = std::make_unique<dae::GameObject>();
 	player2->SetTexture("Decoy.png");
 	player2->SetLocalPosition(450, 200);
 	player2->AddComponent<dae::HealthComponent>(3);
+	player2->movementSpeed = 200.f;
 	dae::InputManager::GetInstance().BindKeyboardCommand(
 		SDL_SCANCODE_A,
-		dae::ButtonState::Down,
-		new dae::MoveLeft{});
+		dae::ButtonState::Pressed,
+		new dae::MoveLeft{ player2 });
 	dae::InputManager::GetInstance().BindKeyboardCommand(
 		SDL_SCANCODE_D,
-		dae::ButtonState::Down,
-		new dae::MoveRight{});
+		dae::ButtonState::Pressed,
+		new dae::MoveRight{ player2 });
 	dae::InputManager::GetInstance().BindKeyboardCommand(
 		SDL_SCANCODE_W,
-		dae::ButtonState::Down,
-		new dae::MoveUp{});
+		dae::ButtonState::Pressed,
+		new dae::MoveUp{ player2 });
 	dae::InputManager::GetInstance().BindKeyboardCommand(
 		SDL_SCANCODE_S,
-		dae::ButtonState::Down,
-		new dae::MoveDown{});
-	player2->movementSpeed = 2.f;
-	scene.Add(std::move(player2));
+		dae::ButtonState::Pressed,
+		new dae::MoveDown{ player2 });
+	scene.Add(player2);
 
 	//load logo
 	player2 = std::make_unique<dae::GameObject>();
 	player2->SetTexture("logo.png");
 	player2->SetLocalPosition(358, 180);
-	scene.Add(std::move(player2));
+	scene.Add(player2);
 
 	//load a font using the provided texture
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
@@ -99,40 +110,40 @@ static void load()
 	auto topText = std::make_unique<dae::GameObject>();
 	topText->SetLocalPosition(292, 20);
 	topText->AddComponent<dae::TextComponent>(std::string("SooiDePeuter-Prog4Engine"), font, SDL_Color(255, 255, 0, 255));
-	scene.Add(std::move(topText));
+	scene.Add(topText);
 
 	//load fps text
 	auto fps = std::make_unique<dae::GameObject>();
 	fps->SetLocalPosition(20, 20);
 	fps->AddComponent<dae::TextComponent>(std::string("[INVALID] FPS"), font, SDL_Color(255, 255, 255, 255));
 	fps->AddComponent<dae::FPSComponent>();
-	scene.Add(std::move(fps));
+	scene.Add(fps);
 
 	//load hp1 object
 	auto hp1 = std::make_unique<dae::GameObject>();
-	hp1->SetLocalPosition(20, 200);
+	hp1->SetLocalPosition(20, 160);
 	hp1->AddComponent<dae::TextComponent>(std::string("player 1 hp: 0"), font, SDL_Color(255, 255, 255, 255));
-	hp1->AddComponent<dae::HealthComponent>();
-	scene.Add(std::move(hp1));
+	//hp1->AddComponent<dae::HealthComponent>();
+	scene.Add(hp1);
 
 	//load hp2 object
 	auto hp2 = std::make_unique<dae::GameObject>();
-	hp2->SetLocalPosition(20, 240);
+	hp2->SetLocalPosition(20, 280);
 	hp2->AddComponent<dae::TextComponent>(std::string("player 2 hp: 0"), font, SDL_Color(255, 255, 255, 255));
-	hp2->AddComponent<dae::HealthComponent>();
-	scene.Add(std::move(hp2));
+	//hp2->AddComponent<dae::HealthComponent>();
+	scene.Add(hp2);
 
 	//load points1 object
 	auto points1 = std::make_unique<dae::GameObject>();
-	points1->SetLocalPosition(20, 220);
+	points1->SetLocalPosition(20, 200);
 	points1->AddComponent<dae::TextComponent>(std::string("player 1 points: 0"), font, SDL_Color(255, 255, 255, 255));
-	scene.Add(std::move(points1));
+	scene.Add(points1);
 
 	//load points2 object
 	auto points2 = std::make_unique<dae::GameObject>();
-	points2->SetLocalPosition(20, 260);
+	points2->SetLocalPosition(20, 240);
 	points2->AddComponent<dae::TextComponent>(std::string("player 2 points: 0"), font, SDL_Color(255, 255, 255, 255));
-	scene.Add(std::move(points2));
+	scene.Add(points2);
 
 	//events
 	player1.get()->AddObserver(hp1.get());

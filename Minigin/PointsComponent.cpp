@@ -1,7 +1,7 @@
 #include "PointsComponent.h"
 #include "GameObject.h"
 
-dae::PointsComponent::PointsComponent(GameObject* owner, int points = 0)
+dae::PointsComponent::PointsComponent(GameObject* owner, int points)
 	:BaseComponent(owner),
 	m_Points{ points }
 {}

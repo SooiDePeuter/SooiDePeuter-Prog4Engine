@@ -3,7 +3,7 @@
 
 using namespace dae;
 
-void Scene::Add(std::unique_ptr<GameObject> object)
+void Scene::Add(std::unique_ptr<GameObject>& object)
 {
 	assert(object != nullptr && "Cannot add a null GameObject to the scene.");
 	m_objects.emplace_back(std::move(object));
@@ -38,6 +38,8 @@ void Scene::FixedUpdate(float deltaTime)
 
 void Scene::Update(float deltaTime)
 {
+	GameObject::SetDeltaTime(deltaTime);
+
 	for(auto& object : m_objects)
 	{
 		object->Update(deltaTime);

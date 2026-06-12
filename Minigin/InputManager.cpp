@@ -1,213 +1,9 @@
-
-#include <SDL3/SDL.h>
-#include <backends/imgui_impl_sdl3.h>
 #include "InputManager.h"
-
-#if __EMSCRIPTEN__
-#include <SDL3/SDL_gamepad.h>
-#else
-#include <Windows.h>
-#include <Xinput.h>
-#endif
 
 #include <array>
 #include <memory>
 
-
-bool dae::InputManager::ProcessInput()
-{
-	SDL_Event e;
-	while (SDL_PollEvent(&e))
-	{
-		if (e.type == SDL_EVENT_QUIT)
-		{
-			return false;
-		}
-
-		ImGui_ImplSDL3_ProcessEvent(&e);
-	}
-
-	const bool* keyboardState = SDL_GetKeyboardState(nullptr);
-
-	// Check and execute all valid keyboard bindings
-	for (auto& binding : m_KeyboardBindings)
-	{
-		bool execute = false;
-
-		switch (binding.state)
-		{
-		case ButtonState::None:
-			break;
-
-		case ButtonState::Pressed:
-			execute = keyboardState[binding.key];
-			break;
-
-			// 0 0 - nothing
-			// 0 1 - down
-			// 1 1 - pressed
-			// 1 0 - up
-
-		case ButtonState::Down:
-			execute = !m_PreviousKeyboardState[binding.key] && keyboardState[binding.key];
-			break;
-
-		case ButtonState::Up:
-			execute = m_PreviousKeyboardState[binding.key] && !keyboardState[binding.key];
-			break;
-		}
-
-		if (execute)
-		{
-			binding.command->Execute();
-		}
-	}
-
-	m_PreviousKeyboardState.assign(
-		keyboardState,
-		keyboardState + SDL_SCANCODE_COUNT
-	);
-
-	for (auto& controller : m_Controllers)
-	{
-		controller->Update();
-	}
-
-	// Check and execute all valid controller bindings
-	for (auto& binding : m_ControllerBindings)
-	{
-		bool execute = false;
-
-		if (binding.controllerIndex < 0 ||
-			static_cast<std::size_t>(binding.controllerIndex) >= m_Controllers.size())
-		{
-			continue;
-		}
-
-		auto& controller = m_Controllers[static_cast<std::size_t>(binding.controllerIndex)];
-
-		switch (binding.state)
-		{
-		case ButtonState::None:
-			break;
-
-		case ButtonState::Pressed:
-			execute = controller->IsPressed(binding.button);
-			break;
-
-		case ButtonState::Down:
-			execute = controller->IsDownThisFrame(binding.button);
-			break;
-
-		case ButtonState::Up:
-			execute = controller->IsUpThisFrame(binding.button);
-			break;
-		}
-
-		if (execute)
-		{
-			binding.command->Execute();
-		}
-	}
-
-	return true;
-}
-
-void dae::InputManager::BindKeyboardCommand(SDL_Scancode key, ButtonState state, BaseGameObjectCommand* command)
-{
-	assert(command && "BindKeyboardCommand received nullptr command");
-
-	if (key == SDL_SCANCODE_UNKNOWN || state == ButtonState::None)
-	{
-		return;
-	}
-
-	m_KeyboardBindings.push_back(KeyboardBinding{ key, state, std::move(command) });
-}
-
-void dae::InputManager::BindControllerCommand(ControllerButton button, ButtonState state, BaseGameObjectCommand* command, int controllerIndex)
-{
-	assert(command && "BindControllerCommand received nullptr command");
-
-	if (state == ButtonState::None || controllerIndex < 0)
-	{
-		return;
-	}
-
-	m_ControllerBindings.push_back(ControllerBinding{ button, state, std::move(command), controllerIndex });
-}
-
-void dae::InputManager::UnbindKeyboardCommand(SDL_Scancode key, ButtonState state)
-{
-	if (key == SDL_SCANCODE_UNKNOWN || state == ButtonState::None)
-	{
-		return;
-	}
-
-	for (auto iterator = m_KeyboardBindings.begin(); iterator != m_KeyboardBindings.end(); ++iterator)
-	{
-		if (iterator->key == key && iterator->state == state)
-		{
-			m_KeyboardBindings.erase(iterator);
-			return;
-		}
-	}
-}
-
-void dae::InputManager::UnbindControllerCommand(ControllerButton button, ButtonState state, int controllerIndex)
-{
-	if (state == ButtonState::None || controllerIndex < 0)
-	{
-		return;
-	}
-
-	for (auto iterator = m_ControllerBindings.begin(); iterator != m_ControllerBindings.end(); ++iterator)
-	{
-		if (iterator->button == button &&
-			iterator->state == state &&
-			iterator->controllerIndex == controllerIndex)
-		{
-			m_ControllerBindings.erase(iterator);
-			return;
-		}
-	}
-}
-
-dae::Controller::Controller(int controllerIndex)
-	: m_pImpl(new dae::Impl{controllerIndex})
-{
-}
-
-dae::Controller::~Controller()
-{
-	delete m_pImpl;
-}
-
-void dae::Controller::Update()
-{
-	m_pImpl->Update();
-}
-
-bool dae::Controller::IsPressed(ControllerButton button) const
-{
-	return m_pImpl->IsPressed(button);
-}
-
-bool dae::Controller::IsDownThisFrame(ControllerButton button) const
-{
-	return m_pImpl->IsDownThisFrame(button);
-}
-
-bool dae::Controller::IsUpThisFrame(ControllerButton button) const
-{
-	return m_pImpl->IsUpThisFrame(button);
-}
-
-dae::Impl::Impl(int controllerIndex)
-	: m_ControllerIndex(controllerIndex)
-{
-
-}
+#pragma comment(lib, "Xinput.lib")
 
 WORD ToXInputButton(dae::ControllerButton button)
 {
@@ -224,51 +20,6 @@ WORD ToXInputButton(dae::ControllerButton button)
 	default:                               return 0;
 	}
 }
-
-void dae::Impl::Update()
-{
-	m_PreviousState = m_CurrentState;
-	ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
-
-	const DWORD result = XInputGetState(m_ControllerIndex, &m_CurrentState);
-	m_IsConnected = (result == ERROR_SUCCESS);
-
-	if (!m_IsConnected)
-	{
-		ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
-		m_ButtonsPressedThisFrame = 0;
-		m_ButtonsReleasedThisFrame = 0;
-		return;
-	}
-
-	const auto buttonChanges =
-		m_CurrentState.Gamepad.wButtons ^ m_PreviousState.Gamepad.wButtons;
-
-	m_ButtonsPressedThisFrame =
-		buttonChanges & m_CurrentState.Gamepad.wButtons;
-
-	m_ButtonsReleasedThisFrame =
-		buttonChanges & (~m_CurrentState.Gamepad.wButtons);
-}
-
-bool dae::Impl::IsPressed(ControllerButton button) const
-{
-	const WORD xButton = ToXInputButton(button);
-	return (m_CurrentState.Gamepad.wButtons & xButton) != 0;
-}
-
-bool dae::Impl::IsUpThisFrame(ControllerButton button) const
-{
-	const WORD xButton = ToXInputButton(button);
-	return (m_ButtonsPressedThisFrame & xButton) != 0;
-}
-
-bool dae::Impl::IsDownThisFrame(ControllerButton button) const
-{
-	const WORD xButton = ToXInputButton(button);
-	return (m_ButtonsReleasedThisFrame & xButton) != 0;
-}
-
 
 #if __EMSCRIPTEN__
 dae::Impl::~Impl()
@@ -390,7 +141,265 @@ void dae::Impl::OpenGamepadIfNeeded()
 	SDL_free(gamepads);
 }
 
+#else
+
+dae::Impl::Impl(int controllerIndex)
+	: m_ControllerIndex(controllerIndex)
+	, m_pCurrentState{ new XINPUT_STATE{} }
+	, m_pPreviousState{ new XINPUT_STATE{} }
+{
+}
+
+void dae::Impl::Update()
+{
+	m_pPreviousState = m_pCurrentState;
+	ZeroMemory(m_pCurrentState, sizeof(XINPUT_STATE));
+
+	const DWORD result{ XInputGetState((DWORD)m_ControllerIndex, m_pCurrentState) };
+	m_IsConnected = (result == ERROR_SUCCESS);
+
+	if (!m_IsConnected)
+	{
+		ZeroMemory(m_pCurrentState, sizeof(XINPUT_STATE));
+		m_ButtonsPressedThisFrame = 0;
+		m_ButtonsReleasedThisFrame = 0;
+		return;
+	}
+
+	const auto buttonChanges =
+		m_pCurrentState->Gamepad.wButtons ^ m_pPreviousState->Gamepad.wButtons;
+
+	m_ButtonsPressedThisFrame =
+		buttonChanges & m_pCurrentState->Gamepad.wButtons;
+
+	m_ButtonsReleasedThisFrame =
+		buttonChanges & (~m_pCurrentState->Gamepad.wButtons);
+}
+
+bool dae::Impl::IsPressed(ControllerButton button) const
+{
+	const WORD xButton = ToXInputButton(button);
+	return (m_pCurrentState->Gamepad.wButtons & xButton) != 0;
+}
+
+bool dae::Impl::IsUpThisFrame(ControllerButton button) const
+{
+	const WORD xButton = ToXInputButton(button);
+	return (m_ButtonsPressedThisFrame & xButton) != 0;
+}
+
+bool dae::Impl::IsDownThisFrame(ControllerButton button) const
+{
+	const WORD xButton = ToXInputButton(button);
+	return (m_ButtonsReleasedThisFrame & xButton) != 0;
+}
+
+
+
 #endif
 
+dae::Controller::Controller(int controllerIndex)
+	: m_pImpl{ new dae::Impl{controllerIndex} }
+{
+}
 
+dae::Controller::~Controller()
+{
+	delete m_pImpl;
+}
 
+void dae::Controller::Update()
+{
+	m_pImpl->Update();
+}
+
+bool dae::Controller::IsPressed(ControllerButton button) const
+{
+	return m_pImpl->IsPressed(button);
+}
+
+bool dae::Controller::IsDownThisFrame(ControllerButton button) const
+{
+	return m_pImpl->IsDownThisFrame(button);
+}
+
+bool dae::Controller::IsUpThisFrame(ControllerButton button) const
+{
+	return m_pImpl->IsUpThisFrame(button);
+}	
+
+bool dae::InputManager::ProcessInput()
+{
+	SDL_Event e;
+	while (SDL_PollEvent(&e))
+	{
+		if (e.type == SDL_EVENT_QUIT)
+		{
+			return false;
+		}
+
+		ImGui_ImplSDL3_ProcessEvent(&e);
+	}
+
+	const bool* keyboardState = SDL_GetKeyboardState(nullptr);
+
+	// Check and execute all valid keyboard bindings
+	for (auto& binding : m_KeyboardBindings)
+	{
+		bool execute = false;
+
+		switch (binding.state)
+		{
+		case ButtonState::None:
+			break;
+
+		case ButtonState::Pressed:
+			execute = keyboardState[binding.key];
+			break;
+
+			// 0 0 - nothing
+			// 0 1 - down
+			// 1 1 - pressed
+			// 1 0 - up
+
+		case ButtonState::Down:
+			execute = !m_PreviousKeyboardState[binding.key] && keyboardState[binding.key];
+			break;
+
+		case ButtonState::Up:
+			execute = m_PreviousKeyboardState[binding.key] && !keyboardState[binding.key];
+			break;
+		}
+
+		if (execute)
+		{
+			binding.command->Execute();
+		}
+	}
+
+	m_PreviousKeyboardState.assign(
+		keyboardState,
+		keyboardState + SDL_SCANCODE_COUNT
+	);
+
+	for (auto& controller : m_Controllers)
+	{
+		controller->Update();
+	}
+
+	// Check and execute all valid controller bindings
+	for (auto& binding : m_ControllerBindings)
+	{
+		bool execute = false;
+
+		if (binding.controllerIndex < 0 ||
+			static_cast<std::size_t>(binding.controllerIndex) >= m_Controllers.size())
+		{
+			continue;
+		}
+
+		auto& controller = m_Controllers[static_cast<std::size_t>(binding.controllerIndex)];
+
+		switch (binding.state)
+		{
+		case ButtonState::None:
+			break;
+
+		case ButtonState::Pressed:
+			execute = controller->IsPressed(binding.button);
+			break;
+
+		case ButtonState::Down:
+			execute = controller->IsDownThisFrame(binding.button);
+			break;
+
+		case ButtonState::Up:
+			execute = controller->IsUpThisFrame(binding.button);
+			break;
+		}
+
+		if (execute)
+		{
+			binding.command->Execute();
+		}
+	}
+
+	return true;
+}
+
+void dae::InputManager::BindKeyboardCommand(SDL_Scancode key, ButtonState state, BaseGameObjectCommand* command)
+{
+	assert(command && "BindKeyboardCommand received nullptr command");
+
+	if (key == SDL_SCANCODE_UNKNOWN || state == ButtonState::None)
+	{
+		return;
+	}
+
+	m_KeyboardBindings.push_back(KeyboardBinding{ key, state, std::move(command) });
+
+	if(key + 1 > m_PreviousKeyboardState.size())
+	{
+		m_PreviousKeyboardState.reserve(key + 1);
+
+		const unsigned int loopCount{unsigned int(m_PreviousKeyboardState.capacity() - m_PreviousKeyboardState.size()) };
+		for (unsigned int index{}; index < loopCount; index++)
+		{
+			m_PreviousKeyboardState.emplace_back(0);
+		}
+	}
+}
+
+void dae::InputManager::BindControllerCommand(ControllerButton button, ButtonState state, BaseGameObjectCommand* command, int controllerIndex)
+{
+	assert(command && "BindControllerCommand received nullptr command");
+
+	if (state == ButtonState::None || controllerIndex < 0)
+	{
+		return;
+	}
+
+	if (m_Controllers.size() == 0)
+	{
+		m_Controllers.reserve(1);
+		m_Controllers.emplace_back(std::make_unique<dae::Controller>(0));
+	}
+
+	m_ControllerBindings.push_back(ControllerBinding{ button, state, std::move(command), controllerIndex });
+}
+
+void dae::InputManager::UnbindKeyboardCommand(SDL_Scancode key, ButtonState state)
+{
+	if (key == SDL_SCANCODE_UNKNOWN || state == ButtonState::None)
+	{
+		return;
+	}
+
+	for (auto iterator = m_KeyboardBindings.begin(); iterator != m_KeyboardBindings.end(); ++iterator)
+	{
+		if (iterator->key == key && iterator->state == state)
+		{
+			m_KeyboardBindings.erase(iterator);
+			return;
+		}
+	}
+}
+
+void dae::InputManager::UnbindControllerCommand(ControllerButton button, ButtonState state, int controllerIndex)
+{
+	if (state == ButtonState::None || controllerIndex < 0)
+	{
+		return;
+	}
+
+	for (auto iterator = m_ControllerBindings.begin(); iterator != m_ControllerBindings.end(); ++iterator)
+	{
+		if (iterator->button == button &&
+			iterator->state == state &&
+			iterator->controllerIndex == controllerIndex)
+		{
+			m_ControllerBindings.erase(iterator);
+			return;
+		}
+	}
+}

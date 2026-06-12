@@ -1,6 +1,17 @@
 #pragma once
 #include "Singleton.h"
 #include "Commands.h"
+
+#include <SDL3/SDL.h>
+#include <backends/imgui_impl_sdl3.h>
+
+#if __EMSCRIPTEN__
+#include <SDL3/SDL_gamepad.h>
+#else
+#include <Windows.h>
+#include <Xinput.h>
+#endif
+
 namespace dae
 {
 
@@ -22,6 +33,55 @@ namespace dae
 		Up,
 		Pressed,
 		None
+	};
+
+	class Impl
+	{
+	public:
+
+		explicit Impl(int controllerIndex);
+#if __EMSCRIPTEN__
+		~Impl();
+#endif
+		void Update();
+
+		bool IsPressed(ControllerButton button) const;
+		bool IsDownThisFrame(ControllerButton button) const;
+		bool IsUpThisFrame(ControllerButton button) const;
+
+	private:
+
+		int m_ControllerIndex{};
+		bool m_IsConnected{ false };
+
+#if __EMSCRIPTEN__
+		void OpenGamepadIfNeeded();
+
+		SDL_Gamepad* m_pGamepad{ nullptr };
+		std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_PreviousButtons{};
+		std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_CurrentButtons{};
+#else
+		XINPUT_STATE* m_pPreviousState;
+		XINPUT_STATE* m_pCurrentState;
+		int m_ButtonsPressedThisFrame{};
+		int m_ButtonsReleasedThisFrame{};
+#endif
+	};
+
+	class Controller final
+	{
+	public:
+
+		explicit Controller(int controllerIndex);
+		~Controller();
+
+		void Update();
+		bool IsPressed(ControllerButton button) const;
+		bool IsDownThisFrame(ControllerButton button) const;
+		bool IsUpThisFrame(ControllerButton button) const;
+
+	private:
+		Impl* m_pImpl;
 	};
 
 	class InputManager final : public Singleton<InputManager>
@@ -58,54 +118,5 @@ namespace dae
 		std::vector<std::unique_ptr<Controller>> m_Controllers{};
 
 		std::vector<uint8_t> m_PreviousKeyboardState{};
-	};
-
-	class Controller final
-	{
-	public:
-
-		explicit Controller(int controllerIndex);
-		~Controller();
-
-		void Update();
-		bool IsPressed(ControllerButton button) const;
-		bool IsDownThisFrame(ControllerButton button) const;
-		bool IsUpThisFrame(ControllerButton button) const;
-
-	private:
-		Impl* m_pImpl;
-	};
-
-	class Impl
-	{
-	public:
-
-		explicit Impl(int controllerIndex);
-#if __EMSCRIPTEN__
-		~Impl();
-#endif
-		void Update();
-
-		bool IsPressed(ControllerButton button) const;
-		bool IsDownThisFrame(ControllerButton button) const;
-		bool IsUpThisFrame(ControllerButton button) const;
-
-	private:
-
-		int m_ControllerIndex{};
-		bool m_IsConnected{ false };
-
-#if __EMSCRIPTEN__
-		void OpenGamepadIfNeeded();
-
-		SDL_Gamepad* m_pGamepad{ nullptr };
-		std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_PreviousButtons{};
-		std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_CurrentButtons{};
-#else
-		XINPUT_STATE m_PreviousState{};
-		XINPUT_STATE m_CurrentState{};
-		int m_ButtonsPressedThisFrame{};
-		int m_ButtonsReleasedThisFrame{};
-#endif
 	};
 }

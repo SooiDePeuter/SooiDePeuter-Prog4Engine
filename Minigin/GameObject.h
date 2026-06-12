@@ -28,7 +28,14 @@ namespace dae
 
 		std::vector<GameObject*> m_Observers;
 
+		static float DeltaTime;
+
 	public:
+		static void SetDeltaTime(float deltaTime)
+		{
+			DeltaTime = deltaTime;
+		}
+
 		void Update(float deltaTime);
 		void Render() const;
 
@@ -100,7 +107,7 @@ namespace dae
 			return false;
 		}
 
-		void CleanupRemovedComponents();
+		//void CleanupRemovedComponents();
 
 		bool SetParent(GameObject* parent);
 		int GetChildCount() const;
@@ -114,19 +121,19 @@ namespace dae
 		float movementSpeed{1.f};
 		void MoveLeft()
 		{
-			SetLocalPosition(GetLocalTransform().GetPosition().x - movementSpeed, GetLocalTransform().GetPosition().y);
+			SetLocalPosition(GetLocalTransform().GetPosition().x - movementSpeed * DeltaTime, GetLocalTransform().GetPosition().y);
 		}
 		void MoveRight()
 		{
-			SetLocalPosition(GetLocalTransform().GetPosition().x + movementSpeed, GetLocalTransform().GetPosition().y);
+			SetLocalPosition(GetLocalTransform().GetPosition().x + movementSpeed * DeltaTime, GetLocalTransform().GetPosition().y);
 		}
 		void MoveUp()
 		{
-			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y + movementSpeed);
+			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y - movementSpeed * DeltaTime);
 		}
 		void MoveDown()
 		{
-			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y - movementSpeed);
+			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y + movementSpeed * DeltaTime);
 		}
 
 		void AddObserver(GameObject* observer);
@@ -141,6 +148,4 @@ namespace dae
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 	};
-
-
 }
