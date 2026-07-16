@@ -5,18 +5,17 @@
 #include "Font.h"
 #include "Texture2D.h"
 
-dae::TextComponent::TextComponent(GameObject* owner, const std::string& text, std::shared_ptr<Font> font, const SDL_Color& color)
+dae::TextComponent::TextComponent(GameObject* owner, std::shared_ptr<Font> font, const SDL_Color& color)
 	: BaseComponent(owner),
 	m_needsUpdate(true),
-	m_text(text),
 	m_color(color),
 	m_font(std::move(font)),
 	m_textTexture(nullptr)
 {
-	
-
 	if (!m_font)
+	{
 		throw std::invalid_argument("TextComponent requires a valid Font");
+	}
 }
 
 void dae::TextComponent::Update(float deltaTime)
@@ -45,14 +44,70 @@ void dae::TextComponent::Render() const
 	}
 }
 
-std::string& dae::TextComponent::GetText()
+//returns the full text as a string
+std::string dae::TextComponent::GetFullTextAsString()
 {
-	return m_text;
+	std::string fullText{};
+
+	for (std::string& textPart : m_textParts)
+	{
+		fullText += textPart;
+	}
+
+	return fullText;
 }
 
-void dae::TextComponent::SetText(const std::string& text)
+//returns the full text divided in their parts
+std::vector<std::string>& dae::TextComponent::GetFullTextAsVector()
 {
-	m_text = text;
+	return m_textParts;
+}
+
+//adds a text part at a given index
+//moves all following parts one index up
+void dae::TextComponent::AddTextPart(int partIndex, const std::string& text)
+{
+	m_textParts.reserve(m_textParts.size() + 1);
+	m_textParts.emplace_back();
+
+	//no, I don't use STL, cry about it
+	for (int index{ int(m_textParts.size()) }; index < partIndex; index--)
+	{
+		m_textParts[index + 1] = m_textParts[index];
+	}
+
+	m_textParts[partIndex] = text;
+}
+
+//removes a text part at given index
+//moves all following parts one index down
+void dae::TextComponent::RemoveTextPart(int partIndex)
+{
+	m_textParts.reserve(m_textParts.size() + 1);
+
+	//no, I don't use STL, cry about it
+	for (int index{ partIndex }; index >= m_textParts.size() - 1; index++)
+	{
+		m_textParts[index] = m_textParts[index + 1];
+	}
+
+	m_textParts.pop_back();
+}
+
+//removes all text parts, leaving the text empty
+void dae::TextComponent::EraseTextComponent()
+{
+	m_textParts.erase(m_textParts.begin(), m_textParts.end());
+}
+
+void dae::TextComponent::SetText(int partIndex, const std::string& text)
+{
+	if (partIndex >= m_textParts.size() || partIndex < 0)
+	{
+		assert("text part index out of bounds!");
+	}
+
+	m_textParts[partIndex] = text;
 	m_needsUpdate = true;
 }
 
@@ -65,8 +120,8 @@ void dae::TextComponent::SetColor(const SDL_Color& color)
 void dae::TextComponent::RebuildTexture()
 {
 	const auto surf = TTF_RenderText_Blended(m_font->GetFont(),
-		m_text.c_str(),
-		static_cast<int>(m_text.length()),
+		GetFullTextAsString().c_str(),
+		static_cast<int>(GetFullTextAsString().length()),
 		m_color);
 
 	if (!surf)

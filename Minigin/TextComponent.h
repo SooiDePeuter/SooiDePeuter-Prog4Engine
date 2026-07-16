@@ -16,12 +16,15 @@ namespace dae
 		void Update(float deltaTime) override;
 		void Render() const override;
 
-		std::string& GetText();
-		void SetText(const std::string& text);
+		std::string GetFullTextAsString();
+		std::vector<std::string>& GetFullTextAsVector();
+		void AddTextPart(int partIndex, const std::string& text);
+		void RemoveTextPart(int partIndex);
+		void EraseTextComponent();
+		void SetText(int partIndex, const std::string& text);
 		void SetColor(const SDL_Color& color);
 
 		TextComponent(GameObject* owner,
-			const std::string& text,
 			std::shared_ptr<Font> font,
 			const SDL_Color& color = { 255, 255, 255, 255 });
 		~TextComponent() = default;
@@ -33,7 +36,7 @@ namespace dae
 		void RebuildTexture();
 
 		bool m_needsUpdate{};
-		std::string m_text{};
+		std::vector<std::string> m_textParts{};
 		SDL_Color m_color{ 255, 255, 255, 255 };
 
 		std::shared_ptr<Font> m_font{};

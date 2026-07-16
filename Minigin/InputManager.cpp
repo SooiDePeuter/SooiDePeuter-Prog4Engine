@@ -238,7 +238,6 @@ bool dae::InputManager::ProcessInput()
 			return false;
 		}
 
-		ImGui_ImplSDL3_ProcessEvent(&e);
 	}
 
 	const bool* keyboardState = SDL_GetKeyboardState(nullptr);

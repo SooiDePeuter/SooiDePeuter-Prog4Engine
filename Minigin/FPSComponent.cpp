@@ -57,7 +57,7 @@ void dae::FPSComponent::UpdateText()
  
     std::ostringstream ss;
     ss << "FPS: " << std::fixed << std::setprecision(1) << m_averageFPS;
-    m_text->SetText(ss.str());
+    m_text->SetText(0, ss.str());
 }
 
 float dae::FPSComponent::GetFPS() const

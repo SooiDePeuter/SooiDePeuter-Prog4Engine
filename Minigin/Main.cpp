@@ -19,7 +19,6 @@
 
 #include <string> 
 #include <filesystem>
-namespace fs = std::filesystem;
 
 static void load()
 {
@@ -61,33 +60,45 @@ static void load()
 	//load top text
 	auto topText = std::make_unique<dae::GameObject>();
 	topText->SetLocalPosition(292, 20);
-	topText->AddComponent<dae::TextComponent>(std::string("SooiDePeuter-Prog4Engine"), font, SDL_Color(255, 255, 0, 255));
+	topText->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 0, 255));
+	topText->GetComponent<dae::TextComponent>()->AddTextPart(0, "SooiDePeuter-Prog4Engine");
 
 	//load fps text
 	auto fps = std::make_unique<dae::GameObject>();
 	fps->SetLocalPosition(20, 20);
-	fps->AddComponent<dae::TextComponent>(std::string("[INVALID] FPS"), font, SDL_Color(255, 255, 255, 255));
+	fps->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	fps->GetComponent<dae::TextComponent>()->AddTextPart(0, "[INVALID] FPS");
 	fps->AddComponent<dae::FPSComponent>();
 
 	//load hp1 object
 	auto hp1 = std::make_unique<dae::GameObject>();
 	hp1->SetLocalPosition(20, 160);
-	hp1->AddComponent<dae::TextComponent>(std::string("player 1 hp: 0"), font, SDL_Color(255, 255, 255, 255));
+	hp1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	hp1->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 1 Health: ");
+	hp1->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player1->GetComponent<dae::HealthComponent>()->GetHealth()));
+
 
 	//load hp2 object
 	auto hp2 = std::make_unique<dae::GameObject>();
-	hp2->SetLocalPosition(20, 280);
-	hp2->AddComponent<dae::TextComponent>(std::string("player 2 hp: 0"), font, SDL_Color(255, 255, 255, 255));
+	hp2->SetLocalPosition(20, 200);
+	hp2->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	hp2->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 2 Health: ");
+	hp2->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player2->GetComponent<dae::HealthComponent>()->GetHealth()));
 
 	//load points1 object
 	auto points1 = std::make_unique<dae::GameObject>();
-	points1->SetLocalPosition(20, 200);
-	points1->AddComponent<dae::TextComponent>(std::string("player 1 points: 0"), font, SDL_Color(255, 255, 255, 255));
+	points1->SetLocalPosition(20, 240);
+	points1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	points1->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 1 Points: ");
+	points1->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player1->GetComponent<dae::PointsComponent>()->GetPoints()));
 
 	//load points2 object
 	auto points2 = std::make_unique<dae::GameObject>();
-	points2->SetLocalPosition(20, 240);
-	points2->AddComponent<dae::TextComponent>(std::string("player 2 points: 0"), font, SDL_Color(255, 255, 255, 255));
+	points2->SetLocalPosition(20, 280);
+	points2->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	points2->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 2 Points: ");
+	points2->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player2->GetComponent<dae::PointsComponent>()->GetPoints()));
+
 
 	//events
 	player1.get()->AddObserver(hp1.get());
@@ -162,8 +173,8 @@ int main(int, char*[])
 #if __EMSCRIPTEN__
 	fs::path data_location = "";
 #else
-	fs::path data_location = "./Data/";
-	if(!fs::exists(data_location))
+	std::filesystem::path data_location = "./Data/";
+	if(!std::filesystem::exists(data_location))
 		data_location = "../Data/";
 #endif
 	dae::Minigin engine(data_location);

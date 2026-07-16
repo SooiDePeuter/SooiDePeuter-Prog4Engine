@@ -3,7 +3,6 @@
 #include "Commands.h"
 
 #include <SDL3/SDL.h>
-#include <backends/imgui_impl_sdl3.h>
 
 #if __EMSCRIPTEN__
 #include <SDL3/SDL_gamepad.h>
