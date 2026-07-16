@@ -26,7 +26,13 @@ namespace dae
 		//dirty flag
 		bool m_isPositionOutOfSync{ false };
 
-		std::vector<GameObject*> m_Observers;
+		struct Observer
+		{
+			GameObject* GameObject;
+			std::vector<std::string>* Tasks;
+		};
+
+		std::vector<Observer> m_Observers;
 
 		static float DeltaTime;
 
@@ -136,10 +142,10 @@ namespace dae
 			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y + movementSpeed * DeltaTime);
 		}
 
-		void AddObserver(GameObject* observer);
+		void AddObserver(GameObject* observer, const std::string& task);
 		void RemoveObserver(GameObject* observer);
 		void PushEvent(GameObject* sender, const std::string& type);
-		void HandleEvent(GameObject* sender, const std::string& type);
+		void HandleEvent(GameObject* sender, const std::string& eventType, const std::vector<std::string>* observerTasks);
 
 		GameObject() = default;
 		~GameObject();

@@ -101,10 +101,10 @@ static void load()
 
 
 	//events
-	player1.get()->AddObserver(hp1.get());
-	player1.get()->AddObserver(points1.get());
-	player2.get()->AddObserver(hp2.get());
-	player2.get()->AddObserver(points2.get());
+	player1.get()->AddObserver(hp1.get(), "UpdateHealth");
+	player2.get()->AddObserver(hp2.get(), "UpdateHealth");
+	player1.get()->AddObserver(points1.get(), "UpdatePoints");
+	player2.get()->AddObserver(points2.get(), "UpdatePoints");
 
 	//commands
 	dae::InputManager::GetInstance().BindControllerCommand(

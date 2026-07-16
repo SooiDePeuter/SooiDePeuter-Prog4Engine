@@ -11,33 +11,35 @@
 
 float dae::GameObject::DeltaTime{ 0.f };
 
-void dae::GameObject::AddObserver(GameObject* observer)
+void dae::GameObject::AddObserver(GameObject* observer, const std::string& task)
 {
 	//validation
 	if (observer == nullptr || observer == this)
 	{
 		return;
 	}
-	for (GameObject* listedObserver : m_Observers)
+	for (Observer& listedObserver : m_Observers)
 	{
-		if (listedObserver == observer)
+		if (listedObserver.GameObject == observer)
 		{
+			listedObserver.Tasks->push_back(task);
 			return;
 		}
 	}
 
-	m_Observers.push_back(observer);
+	m_Observers.push_back({ observer , new std::vector<std::string>{task} });
 }
 
 void dae::GameObject::RemoveObserver(GameObject* observer)
 {
+
 	if (observer == nullptr || observer == this)
 	{
 		return;
 	}
 	for (int index{}; index < m_Observers.size(); index++)
 	{
-		if (m_Observers[index] == observer)
+		if (m_Observers[index].GameObject == observer)
 		{
 			m_Observers.erase(m_Observers.begin() + index);
 		}
@@ -46,21 +48,38 @@ void dae::GameObject::RemoveObserver(GameObject* observer)
 
 void dae::GameObject::PushEvent(GameObject* sender, const std::string& type)
 {
-	for (GameObject* listedObserver : m_Observers)
+	for (Observer& listedObserver : m_Observers)
 	{
-		listedObserver->HandleEvent(sender, type);
+		listedObserver.GameObject->HandleEvent(sender, type, listedObserver.Tasks);
 	}
 }
 
-void dae::GameObject::HandleEvent(GameObject* sender, const std::string& type)
+void dae::GameObject::HandleEvent(GameObject* sender, const std::string& eventType, const std::vector<std::string>* observerTasks)
 {
-	if (type == "UpdateHealth" && HasComponent<TextComponent>())
+	//validation
+	const int taskCount{ (int)observerTasks->size() };
+	int invalidTaskCount{};
+
+	for (const std::string& observerTask : *observerTasks)
+	{
+		if (eventType != observerTask)
+		{
+			invalidTaskCount++;
+		}
+	}
+
+	if (taskCount == invalidTaskCount)
+	{
+		return;
+	}
+
+	if (eventType == "UpdateHealth" && HasComponent<TextComponent>())
 	{
 		TextComponent* component = GetComponent<TextComponent>();
 		std::string text{ std::to_string(sender->GetComponent<HealthComponent>()->GetHealth()) };
 		component->SetText(1, text);
 	}
-	else if (type == "UpdatePoints" && HasComponent<TextComponent>())
+	else if (eventType == "UpdatePoints" && HasComponent<TextComponent>())
 	{
 		TextComponent* component = GetComponent<TextComponent>();
 		std::string text{ std::to_string(sender->GetComponent<PointsComponent>()->GetPoints()) };
