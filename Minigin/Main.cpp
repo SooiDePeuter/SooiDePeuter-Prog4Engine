@@ -129,12 +129,12 @@ static void load()
 		0);
 	dae::InputManager::GetInstance().BindControllerCommand(
 		dae::ControllerButton::X,
-		dae::ButtonState::Pressed,
+		dae::ButtonState::Down,
 		new dae::GetPoints{ player1 },
 		0);
 	dae::InputManager::GetInstance().BindControllerCommand(
 		dae::ControllerButton::Y,
-		dae::ButtonState::Pressed,
+		dae::ButtonState::Up,
 		new dae::TakeDamage{ player1 },
 		0);
 

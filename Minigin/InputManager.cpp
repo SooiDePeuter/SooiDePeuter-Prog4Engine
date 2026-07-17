@@ -21,8 +21,41 @@ WORD ToXInputButton(dae::ControllerButton button)
 	}
 }
 
+class dae::Controller::Impl
+{
+public:
+
+	explicit Impl(int controllerIndex);
 #if __EMSCRIPTEN__
-dae::Impl::~Impl()
+	~Impl();
+#endif
+	void Update();
+
+	bool IsPressed(ControllerButton button) const;
+	bool IsDownThisFrame(ControllerButton button) const;
+	bool IsUpThisFrame(ControllerButton button) const;
+
+private:
+
+	int m_ControllerIndex{};
+	bool m_IsConnected{ false };
+
+#if __EMSCRIPTEN__
+	void OpenGamepadIfNeeded();
+
+	SDL_Gamepad* m_pGamepad{ nullptr };
+	std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_PreviousButtons{};
+	std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_CurrentButtons{};
+#else
+	XINPUT_STATE* m_pPreviousState;
+	XINPUT_STATE* m_pCurrentState;
+	int m_ButtonsPressedThisFrame{};
+	int m_ButtonsReleasedThisFrame{};
+#endif
+};
+
+#if __EMSCRIPTEN__
+dae::Controller::Impl::~Impl()
 {
 	if (m_pGamepad)
 	{
@@ -47,7 +80,7 @@ SDL_GamepadButton ToSDLButton(dae::ControllerButton button)
 	}
 }
 
-void dae::Impl::Update()
+void dae::Controller::Impl::Update()
 {
 	for (int index{}; index < static_cast<int>(SDL_GAMEPAD_BUTTON_COUNT); ++index)
 	{
@@ -78,7 +111,7 @@ void dae::Impl::Update()
 	}
 }
 
-bool dae::Impl::IsPressed(ControllerButton button) const
+bool dae::Controller::Impl::IsPressed(ControllerButton button) const
 {
 	const auto sdlButton = ToSDLButton(button);
 
@@ -90,7 +123,7 @@ bool dae::Impl::IsPressed(ControllerButton button) const
 	return m_CurrentButtons[static_cast<int>(sdlButton)];
 }
 
-bool dae::Impl::IsDownThisFrame(ControllerButton button) const
+bool dae::Controller::Impl::IsDownThisFrame(ControllerButton button) const
 {
 	const auto sdlButton = ToSDLButton(button);
 
@@ -104,7 +137,7 @@ bool dae::Impl::IsDownThisFrame(ControllerButton button) const
 	return !m_PreviousButtons[index] && m_CurrentButtons[index];
 }
 
-bool dae::Impl::IsUpThisFrame(ControllerButton button) const
+bool dae::Controller::Impl::IsUpThisFrame(ControllerButton button) const
 {
 	const auto sdlButton = ToSDLButton(button);
 
@@ -118,7 +151,7 @@ bool dae::Impl::IsUpThisFrame(ControllerButton button) const
 	return m_PreviousButtons[index] && !m_CurrentButtons[index];
 }
 
-void dae::Impl::OpenGamepadIfNeeded()
+void dae::Controller::Impl::OpenGamepadIfNeeded()
 {
 	if (m_pGamepad)
 	{
@@ -143,16 +176,16 @@ void dae::Impl::OpenGamepadIfNeeded()
 
 #else
 
-dae::Impl::Impl(int controllerIndex)
+dae::Controller::Impl::Impl(int controllerIndex)
 	: m_ControllerIndex(controllerIndex)
 	, m_pCurrentState{ new XINPUT_STATE{} }
 	, m_pPreviousState{ new XINPUT_STATE{} }
 {
 }
 
-void dae::Impl::Update()
+void dae::Controller::Impl::Update()
 {
-	m_pPreviousState = m_pCurrentState;
+	*m_pPreviousState = *m_pCurrentState;
 	ZeroMemory(m_pCurrentState, sizeof(XINPUT_STATE));
 
 	const DWORD result{ XInputGetState((DWORD)m_ControllerIndex, m_pCurrentState) };
@@ -176,19 +209,19 @@ void dae::Impl::Update()
 		buttonChanges & (~m_pCurrentState->Gamepad.wButtons);
 }
 
-bool dae::Impl::IsPressed(ControllerButton button) const
+bool dae::Controller::Impl::IsPressed(ControllerButton button) const
 {
 	const WORD xButton = ToXInputButton(button);
 	return (m_pCurrentState->Gamepad.wButtons & xButton) != 0;
 }
 
-bool dae::Impl::IsUpThisFrame(ControllerButton button) const
+bool dae::Controller::Impl::IsUpThisFrame(ControllerButton button) const
 {
 	const WORD xButton = ToXInputButton(button);
 	return (m_ButtonsPressedThisFrame & xButton) != 0;
 }
 
-bool dae::Impl::IsDownThisFrame(ControllerButton button) const
+bool dae::Controller::Impl::IsDownThisFrame(ControllerButton button) const
 {
 	const WORD xButton = ToXInputButton(button);
 	return (m_ButtonsReleasedThisFrame & xButton) != 0;
@@ -199,7 +232,7 @@ bool dae::Impl::IsDownThisFrame(ControllerButton button) const
 #endif
 
 dae::Controller::Controller(int controllerIndex)
-	: m_pImpl{ new dae::Impl{controllerIndex} }
+	: m_pImpl{ new dae::Controller::Impl{controllerIndex} }
 {
 }
 

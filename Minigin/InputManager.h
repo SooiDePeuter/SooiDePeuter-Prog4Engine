@@ -34,39 +34,6 @@ namespace dae
 		None
 	};
 
-	class Impl
-	{
-	public:
-
-		explicit Impl(int controllerIndex);
-#if __EMSCRIPTEN__
-		~Impl();
-#endif
-		void Update();
-
-		bool IsPressed(ControllerButton button) const;
-		bool IsDownThisFrame(ControllerButton button) const;
-		bool IsUpThisFrame(ControllerButton button) const;
-
-	private:
-
-		int m_ControllerIndex{};
-		bool m_IsConnected{ false };
-
-#if __EMSCRIPTEN__
-		void OpenGamepadIfNeeded();
-
-		SDL_Gamepad* m_pGamepad{ nullptr };
-		std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_PreviousButtons{};
-		std::array<bool, SDL_GAMEPAD_BUTTON_COUNT> m_CurrentButtons{};
-#else
-		XINPUT_STATE* m_pPreviousState;
-		XINPUT_STATE* m_pCurrentState;
-		int m_ButtonsPressedThisFrame{};
-		int m_ButtonsReleasedThisFrame{};
-#endif
-	};
-
 	class Controller final
 	{
 	public:
@@ -80,6 +47,7 @@ namespace dae
 		bool IsUpThisFrame(ControllerButton button) const;
 
 	private:
+		class Impl;
 		Impl* m_pImpl;
 	};
 
