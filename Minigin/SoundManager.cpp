@@ -14,6 +14,9 @@ class dae::SoundSystem::Impl
 	MIX_Mixer* m_Mixer;
 	MIX_Track* m_Track;
 
+	float m_MasterVolume = 0.5f;
+	bool m_IsMuted;
+
 	void CheckQueue(); //function to avoid recursive form of PlayOldestSound
 	void playOldestSound();
 
@@ -25,6 +28,10 @@ public:
 	void AddToSoundQueue(const SoundRequest& soundRequest);
 	MIX_Audio* GetSoundObjectById(int id);
 	void AddToSoundObjects(const SoundObject& soundObject);
+
+	void AddVolume(bool increase, float volume = 0.01f);
+	void MuteVolume();
+	bool GetIsMuted();
 };
 
 dae::SoundSystem::Impl::Impl()
@@ -62,8 +69,11 @@ void dae::SoundSystem::Impl::playOldestSound()
 
 	MIX_Audio* audioclip = GetSoundObjectById(m_SoundQueue.front().Id);
 
-	MIX_SetTrackAudio(m_Track, audioclip);
+	// !m_IsMuted returns 0 if muted, 1 if unmuted
+	const float volume = m_MasterVolume * m_SoundQueue.front().Volume * !m_IsMuted;
 
+	MIX_SetTrackAudio(m_Track, audioclip);
+	MIX_SetTrackGain(m_Track, volume);
 	MIX_PlayTrack(m_Track, 0);
 
 	m_SoundQueue.pop();
@@ -103,6 +113,28 @@ void dae::SoundSystem::Impl::AddToSoundObjects(const SoundObject& soundObject)
 
 }
 
+void dae::SoundSystem::Impl::AddVolume(bool increase, float volume)
+{
+	if (increase)
+	{
+		m_MasterVolume += volume;
+	}
+	else
+	{
+		m_MasterVolume -= volume;
+	}
+}
+
+void dae::SoundSystem::Impl::MuteVolume()
+{
+	m_IsMuted = !m_IsMuted;
+}
+
+bool dae::SoundSystem::Impl::GetIsMuted()
+{
+	return m_IsMuted;
+}
+
 dae::SoundSystem::SoundSystem()
 	: m_pImpl{ new Impl{} }
 {
@@ -121,6 +153,21 @@ void dae::SoundSystem::play(const SoundRequest& sound)
 void dae::SoundSystem::RegisterSound(const SoundObject& soundObject)
 {
 	m_pImpl->AddToSoundObjects(soundObject);
+}
+
+void dae::SoundSystem::AddVolume(bool increase, float volume)
+{
+	m_pImpl->AddVolume(increase, volume);
+}
+
+void dae::SoundSystem::MuteVolume()
+{
+	m_pImpl->MuteVolume();
+}
+
+bool dae::SoundSystem::GetIsMuted()
+{
+	m_pImpl->GetIsMuted();
 }
 
 

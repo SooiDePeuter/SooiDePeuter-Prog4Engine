@@ -28,7 +28,7 @@ static void load()
 	//register sounds in order of index
 	dae::ServiceLocator::GetService().RegisterSound({ 0, "Data/TestSong2.mp3" });
 	
-	dae::ServiceLocator::GetService().play({ 0, 100 });
+	dae::ServiceLocator::GetService().play({ 0, 0.1f });
 
 	//load timer
 	auto timer = dae::Timer{};

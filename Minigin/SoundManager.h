@@ -25,6 +25,9 @@ namespace dae
 
 		void play(const SoundRequest& sound);
 		void RegisterSound(const SoundObject& soundObject);
+		void AddVolume(bool increase, float volume = 0.01f);
+		void MuteVolume();
+		bool GetIsMuted();
 	};
 
 	class ServiceLocator final
