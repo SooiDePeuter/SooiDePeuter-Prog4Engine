@@ -16,12 +16,21 @@
 #include "HealthComponent.h"
 #include "Scene.h"
 #include "Timer.h"
+#include "SoundManager.h"
 
 #include <string> 
 #include <filesystem>
 
 static void load()
 {
+	auto soundSystem = std::make_unique<dae::SoundSystem>();
+	dae::ServiceLocator::RegisterService(soundSystem);
+
+	//register sounds in order of index
+	dae::ServiceLocator::GetService().RegisterSound({ 0, "Data/TestSong2.mp3" });
+	
+	dae::ServiceLocator::GetService().play({ 0, 100 });
+
 	//load timer
 	auto timer = dae::Timer{};
 	timer.Reset();
@@ -171,7 +180,7 @@ static void load()
 int main(int, char*[]) 
 {
 #if __EMSCRIPTEN__
-	fs::path data_location = "";
+	std::filesystem::path data_location = "";
 #else
 	std::filesystem::path data_location = "./Data/";
 	if(!std::filesystem::exists(data_location))
