@@ -1,6 +1,7 @@
 #include "SoundManager.h"
 #include <queue>
 #include <iostream>
+#include <thread>
 
 #include <SDL3/SDL.h>
 #include <SDL3_mixer/SDL_mixer.h>
@@ -35,8 +36,10 @@ dae::SoundSystem::Impl::Impl()
 
 dae::SoundSystem::Impl::~Impl()
 {
-	MIX_DestroyTrack(m_Track);
-	MIX_DestroyMixer(m_Mixer);
+
+	MIX_StopAllTracks(m_Mixer, 0);
+
+	MIX_Quit();
 }
 
 void dae::SoundSystem::Impl::CheckQueue()
@@ -69,7 +72,9 @@ void dae::SoundSystem::Impl::playOldestSound()
 void dae::SoundSystem::Impl::AddToSoundQueue(const SoundRequest& sound)
 {
 	m_SoundQueue.push(sound);
-	CheckQueue();
+
+	std::thread myThread(&Impl::CheckQueue, this);
+	myThread.detach(); //keep running until queue is empty
 }
 
 MIX_Audio* dae::SoundSystem::Impl::GetSoundObjectById(int id)
@@ -88,8 +93,13 @@ void dae::SoundSystem::Impl::AddToSoundObjects(const SoundObject& soundObject)
 		m_SoundObjects.reserve(soundObject.Id + 1);
 	}
 
+	for (int index{ (int)m_SoundObjects.size() }; index < m_SoundObjects.capacity(); index++)
+	{
+		m_SoundObjects.emplace_back(nullptr);
+	}
+
 	MIX_Audio* audioclip = MIX_LoadAudio(m_Mixer, soundObject.Path, false);
-	m_SoundObjects.emplace_back(audioclip);
+	m_SoundObjects[soundObject.Id] = audioclip;
 
 }
 
@@ -114,14 +124,14 @@ void dae::SoundSystem::RegisterSound(const SoundObject& soundObject)
 }
 
 
-std::unique_ptr<dae::SoundSystem> dae::ServiceLocator::ServiceInstance = std::make_unique<dae::SoundSystem>();
+std::unique_ptr<dae::SoundSystem> dae::ServiceLocator::ServiceInstance = nullptr;
 
 dae::SoundSystem& dae::ServiceLocator::GetService()
 {
 	return *ServiceInstance;
 }
 
-void dae::ServiceLocator::RegisterService(std::unique_ptr<dae::SoundSystem>& service)
+void dae::ServiceLocator::RegisterService(std::unique_ptr<dae::SoundSystem>&& service)
 {
 	ServiceInstance = std::move(service);
 }

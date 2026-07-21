@@ -35,6 +35,6 @@ namespace dae
 
 		static SoundSystem& GetService();
 
-		static void RegisterService(std::unique_ptr<SoundSystem>& service);
+		static void RegisterService(std::unique_ptr<SoundSystem>&& service);
 	};
 }

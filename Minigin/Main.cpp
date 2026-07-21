@@ -23,8 +23,7 @@
 
 static void load()
 {
-	auto soundSystem = std::make_unique<dae::SoundSystem>();
-	dae::ServiceLocator::RegisterService(soundSystem);
+	dae::ServiceLocator::RegisterService(std::make_unique<dae::SoundSystem>());
 
 	//register sounds in order of index
 	dae::ServiceLocator::GetService().RegisterSound({ 0, "Data/TestSong2.mp3" });
