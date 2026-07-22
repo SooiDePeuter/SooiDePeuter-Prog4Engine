@@ -15,7 +15,7 @@ class dae::SoundSystem::Impl
 	MIX_Track* m_Track;
 
 	float m_MasterVolume = 0.5f;
-	bool m_IsMuted;
+	bool m_IsMuted{false};
 
 	void CheckQueue(); //function to avoid recursive form of PlayOldestSound
 	void playOldestSound();
@@ -167,7 +167,7 @@ void dae::SoundSystem::MuteVolume()
 
 bool dae::SoundSystem::GetIsMuted()
 {
-	m_pImpl->GetIsMuted();
+	return m_pImpl->GetIsMuted();
 }
 
 

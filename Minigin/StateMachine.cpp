@@ -26,7 +26,9 @@ void SingularStateMachine::CheckForNextState()
 
 PushDownStateMachine::~PushDownStateMachine()
 {
-	m_States.empty();
+	//clear stack, might be shallow
+	std::stack<State*> emptyStack;
+	m_States.swap(emptyStack);
 }
 
 void PushDownStateMachine::Update(float deltaTime, GameObject* gameObject)
@@ -58,7 +60,9 @@ void PushDownStateMachine::CheckForNextState()
 		//if stack too big, clear it
 		if (m_States.size() > 50)
 		{
-			m_States.empty();
+			//clear stack, might be shallow
+			std::stack<State*> emptyStack;
+			m_States.swap(emptyStack);
 		}
 
 		m_States.push(previousState);

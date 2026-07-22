@@ -6,19 +6,19 @@ if(EMSCRIPTEN)
 endif()
 
 if(EMSCRIPTEN)
-  set(TARGET_NAME minigin_web)
+  set(LIBRARY_NAME minigin_web)
+  set(TARGET_NAME Burgertime)
   set(TARGET_PARAM )
 else()
-  set(TARGET_NAME minigin)
+  set(LIBRARY_NAME minigin)
+  set(TARGET_NAME Burgertime)
   set(TARGET_PARAM WIN32)
 endif()
 
-# list source files here
-add_executable(${TARGET_NAME} ${TARGET_PARAM}
+add_library(${LIBRARY_NAME} STATIC
   Minigin/Font.cpp
   Minigin/GameObject.cpp
   Minigin/InputManager.cpp
-  Minigin/Main.cpp
   Minigin/Minigin.cpp
   Minigin/Renderer.cpp
   Minigin/ResourceManager.cpp
@@ -33,7 +33,11 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/SoundManager.cpp
   Minigin/StateMachine.cpp)
 
+add_executable(${TARGET_NAME} ${TARGET_PARAM}
+  Burgertime/Main.cpp)
+
 # enable c++20 features
+target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_20)
 target_compile_features(${TARGET_NAME} PUBLIC cxx_std_20)
 
 include(FetchContent)
@@ -121,7 +125,7 @@ if(NOT SDL3_mixer_FOUND)
     FetchContent_MakeAvailable(SDL3_mixer)
 endif()
 
-target_include_directories("${TARGET_NAME}" PUBLIC 
+target_include_directories("${LIBRARY_NAME}" PUBLIC 
   ${CMAKE_SOURCE_DIR}/Minigin/
   ${glm_SOURCE_DIR}
   ${sdl3_SOURCE_DIR}/include
@@ -131,11 +135,19 @@ target_include_directories("${TARGET_NAME}" PUBLIC
   ${VLD_INCLUDE_DIR}
 )
 
-target_link_libraries("${TARGET_NAME}" PUBLIC 
-  SDL3::SDL3 
+target_include_directories(${TARGET_NAME} PRIVATE
+  ${CMAKE_SOURCE_DIR}/Burgertime
+)
+
+target_link_libraries(${LIBRARY_NAME} PUBLIC
+  SDL3::SDL3
   SDL3_ttf::SDL3_ttf
   SDL3_mixer::SDL3_mixer
   ${VLD_LIBRARIES}
+)
+
+target_link_libraries(${TARGET_NAME} PRIVATE
+  ${LIBRARY_NAME}
 )
 
 if (WIN32)
@@ -149,6 +161,7 @@ find_package(Steamworks QUIET)
 
 target_include_directories("${TARGET_NAME}" PUBLIC
   ${CMAKE_SOURCE_DIR}/Minigin/
+
   ${VLD_INCLUDE_DIR}
 )
 
@@ -161,8 +174,10 @@ target_link_libraries("${TARGET_NAME}" PUBLIC
 
 if(MSVC)
   # compile at warning level 4 + treat warnings as errors
+  target_compile_options(${LIBRARY_NAME} PRIVATE /W4 /WX)
   target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX)
 else()
+  target_compile_options(${LIBRARY_NAME} PRIVATE -Wall -Wextra -Werror)
   target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Werror)
 endif()
 
