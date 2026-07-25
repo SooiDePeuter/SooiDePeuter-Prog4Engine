@@ -151,12 +151,12 @@ void dae::GameObject::SetTextureDimensions(float width, float height)
 	m_TextureHeight = height;
 }
 
-float dae::GameObject::GetTextureWidth()
+float dae::GameObject::GetTextureWidth() const
 {
 	return m_TextureWidth;
 }
 
-float dae::GameObject::GetTextureHeight()
+float dae::GameObject::GetTextureHeight() const
 {
 	return m_TextureHeight;
 }

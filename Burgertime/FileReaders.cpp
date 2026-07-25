@@ -1,4 +1,5 @@
 #include "FileReaders.h"
+#include "HitboxComponent.h"
 #include <fstream>
 #include <iostream>
 
@@ -24,23 +25,28 @@ std::unique_ptr<dae::GameObject> dae::LevelReader::ReadLevelFile(const std::stri
 			}
 
 			auto levelPart = std::make_unique<dae::GameObject>();
-			levelPart.get()->SetParent(level.get());
-			levelPart.get()->SetLocalPosition(xIndex * scale, yIndex * scale);
-			levelPart.get()->SetTextureDimensions(scale, scale);
+			levelPart->SetParent(level.get());
+			levelPart->SetLocalPosition(xIndex * scale, yIndex * scale);
+			levelPart->SetTextureDimensions(scale, scale);
 
 			switch (letter)
 			{
 			//|
 			case 124:
 				levelPart->SetTexture("Ladder.png");
+				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale);
 				break;
 			//B
 			case 66:
 				levelPart->SetTexture("Ladder_Blue.png");
+				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale);
+				levelPart->AddComponent<dae::HitboxComponent>(0.f, 0.750f * scale, scale, 0.250f * scale);
 				break;
 			//C
 			case 67:
 				levelPart->SetTexture("Ladder_Cyan.png");
+				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale);
+				levelPart->AddComponent<dae::HitboxComponent>(0.f, 0.750f * scale, scale, 0.250f * scale);
 				break;
 			//L
 			case 76:

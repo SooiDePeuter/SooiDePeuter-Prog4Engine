@@ -31,7 +31,7 @@ namespace dae
 		struct Observer
 		{
 			GameObject* GameObject;
-			std::vector<std::string>* Tasks;
+			std::vector<std::string>* Tasks; 
 		};
 
 		std::vector<Observer> m_Observers;
@@ -56,8 +56,8 @@ namespace dae
 
 		void SetTexture(const std::string& filename);
 		void SetTextureDimensions(float width, float height);
-		float GetTextureWidth();
-		float GetTextureHeight();
+		float GetTextureWidth() const;
+		float GetTextureHeight() const;
 		void SetLocalPosition(float x, float y);
 
 		//---Componennt interface---
