@@ -18,6 +18,8 @@
 #include "Timer.h"
 #include "SoundManager.h"
 
+#include "FileReaders.h"
+
 #include <string> 
 #include <filesystem>
 
@@ -28,7 +30,7 @@ static void load()
 	//register sounds in order of index
 	dae::ServiceLocator::GetService().RegisterSound({ 0, "Data/TestSong2.mp3" });
 	
-	dae::ServiceLocator::GetService().play({ 0, 0.1f });
+	dae::ServiceLocator::GetService().play({ 0, 1.f });
 
 	//load timer
 	auto timer = dae::Timer{};
@@ -37,10 +39,10 @@ static void load()
 	//load scene manager
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
 
-	//load background
-	auto backGround = std::make_unique<dae::GameObject>();
-	backGround->SetTexture("background.png");
+	//load level
+	auto level = dae::LevelReader::ReadLevelFile("Data/Level_1.txt", scene, 32);
 
+/*
 	//load decoy 1
 	auto player1 = std::make_unique<dae::GameObject>();
 	player1->SetTexture("Decoy_Happy.png");
@@ -57,10 +59,6 @@ static void load()
 	player2->AddComponent<dae::PointsComponent>(0);
 	player2->movementSpeed = 200.f;
 
-	//load logo
-	auto logo = std::make_unique<dae::GameObject>();
-	logo->SetTexture("logo.png");
-	logo->SetLocalPosition(358, 180);
 
 	//load a font using the provided texture
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
@@ -162,18 +160,17 @@ static void load()
 		SDL_SCANCODE_S,
 		dae::ButtonState::Pressed,
 		new dae::MoveDown{ player2 });
-
+*/
 	//scene adds in order(invalidates)
-	scene.Add(backGround);
-	scene.Add(player1);
-	scene.Add(player2);
-	scene.Add(logo);
-	scene.Add(topText);
-	scene.Add(fps);
-	scene.Add(hp1);
-	scene.Add(hp2);
-	scene.Add(points1);
-	scene.Add(points2);
+	scene.Add(level);
+	//scene.Add(player1);
+	//scene.Add(player2);
+	//scene.Add(topText);
+	//scene.Add(fps);
+	//scene.Add(hp1);
+	//scene.Add(hp2);
+	//scene.Add(points1);
+	//scene.Add(points2);
 }
 
 int main(int, char*[]) 

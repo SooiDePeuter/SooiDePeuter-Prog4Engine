@@ -18,6 +18,8 @@ namespace dae
 		TransformComponent m_localTransform{};
 		TransformComponent m_worldTransform{};
 		std::shared_ptr<Texture2D> m_texture{};
+		float m_TextureWidth{ 100 };
+		float m_TextureHeight{ 100 };
 		std::vector<std::unique_ptr<BaseComponent>> m_components{};
 
 		GameObject* m_parent{};
@@ -53,6 +55,9 @@ namespace dae
 		}
 
 		void SetTexture(const std::string& filename);
+		void SetTextureDimensions(float width, float height);
+		float GetTextureWidth();
+		float GetTextureHeight();
 		void SetLocalPosition(float x, float y);
 
 		//---Componennt interface---

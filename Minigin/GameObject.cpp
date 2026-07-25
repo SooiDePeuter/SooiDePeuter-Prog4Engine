@@ -1,3 +1,4 @@
+#include "GameObject.h"
 #include <string>
 #include "GameObject.h"
 #include "ResourceManager.h"
@@ -5,6 +6,7 @@
 #include "TextComponent.h"
 #include "HealthComponent.h"
 #include "PointsComponent.h"
+#include "Texture2D.h"
 #include <cassert>
 #include <algorithm>
 
@@ -127,7 +129,7 @@ void dae::GameObject::Render() const
 	if (m_texture)
 	{
 		const auto& pos = m_worldTransform.GetPosition();
-		Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
+		Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y, m_TextureWidth, m_TextureHeight);
 	}
 
 	for (const auto& component : m_components)
@@ -141,6 +143,22 @@ void dae::GameObject::Render() const
 void dae::GameObject::SetTexture(const std::string& filename)
 {
 	m_texture = ResourceManager::GetInstance().LoadTexture(filename);
+}
+
+void dae::GameObject::SetTextureDimensions(float width, float height)
+{
+	m_TextureWidth = width;
+	m_TextureHeight = height;
+}
+
+float dae::GameObject::GetTextureWidth()
+{
+	return m_TextureWidth;
+}
+
+float dae::GameObject::GetTextureHeight()
+{
+	return m_TextureHeight;
 }
 
 void dae::GameObject::SetLocalPosition(float x, float y)

@@ -45,7 +45,8 @@ dae::Texture2D::Texture2D(const std::string &fullPath)
     }
 }
 
-dae::Texture2D::Texture2D(SDL_Texture* texture)	: m_texture{ texture } 
+dae::Texture2D::Texture2D(SDL_Texture* texture)	
+    : m_texture{ texture }
 {
 	assert(m_texture != nullptr);
 }
