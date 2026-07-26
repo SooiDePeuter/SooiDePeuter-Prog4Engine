@@ -5,8 +5,8 @@
 #include "Font.h"
 #include "Texture2D.h"
 
-dae::TextComponent::TextComponent(GameObject* owner, std::shared_ptr<Font> font, const SDL_Color& color)
-	: BaseComponent(owner),
+dae::TextComponent::TextComponent(GameObject* owner, std::shared_ptr<Font> font, const SDL_Color& color, std::string* task)
+	: BaseComponent(owner, task),
 	m_needsUpdate(true),
 	m_color(color),
 	m_font(std::move(font)),

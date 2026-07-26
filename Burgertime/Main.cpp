@@ -83,20 +83,22 @@ static void load()
 	//load hp1 object
 	auto hp1 = std::make_unique<dae::GameObject>();
 	hp1->SetLocalPosition(20, 160);
-	hp1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	std::string hp1Task{"UpdateHealth"};
+	hp1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255), &hp1Task);
 	hp1->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 1 Health: ");
 	hp1->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player1->GetComponent<dae::HealthComponent>()->GetHealth()));
 
 	//load points1 object
 	auto points1 = std::make_unique<dae::GameObject>();
 	points1->SetLocalPosition(20, 240);
-	points1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
+	std::string points1Task{ "UpdatePoints" };
+	points1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255), &points1Task);
 	points1->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 1 Points: ");
 	points1->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player1->GetComponent<dae::PointsComponent>()->GetPoints()));
 
 	//events
-	player1.get()->AddObserver(hp1.get(), "UpdateHealth");
-	player1.get()->AddObserver(points1.get(), "UpdatePoints");;
+	player1.get()->AddObserver(hp1->GetComponent<dae::TextComponent>());
+	player1.get()->AddObserver(points1->GetComponent<dae::TextComponent>());
 
 	//commands
 	dae::InputManager::GetInstance().BindControllerCommand(

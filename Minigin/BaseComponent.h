@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 namespace dae
 {
 	class GameObject;
@@ -15,6 +17,11 @@ namespace dae
 			return m_Owner;
 		}
 
+		std::string* GetTask() const
+		{
+			return m_Task;
+		}
+
 		bool GetIsActive() const 
 		{
 			return m_IsActive;
@@ -25,7 +32,10 @@ namespace dae
 			m_IsActive = active;
 		}
 
-		virtual ~BaseComponent() = default;
+		virtual ~BaseComponent()
+		{
+			delete m_Task;
+		};
 		BaseComponent(const BaseComponent& other) = delete;
 		BaseComponent(BaseComponent&& other) = delete;
 		BaseComponent& operator=(const BaseComponent& other) = delete;
@@ -34,9 +44,11 @@ namespace dae
 		bool m_IsMarkedForRemoval{ false };
 
 	protected:
-		explicit BaseComponent(GameObject* owner) : m_Owner{ owner } {};
+		explicit BaseComponent(GameObject* owner, std::string* task = nullptr) : m_Owner{owner}, m_Task{task} {};
 
 		GameObject* m_Owner{};
 		bool m_IsActive{ true };
+
+		std::string* m_Task{};
 	};
 }

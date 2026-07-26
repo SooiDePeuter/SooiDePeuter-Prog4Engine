@@ -7,7 +7,7 @@ namespace dae
 	{
 	public:
 
-		PointsComponent(GameObject* owner, int points = 0);
+		PointsComponent(GameObject* owner, int points = 0, std::string* task = nullptr);
 
 		void Update(float deltaTime) override;
 		void Render() const override;

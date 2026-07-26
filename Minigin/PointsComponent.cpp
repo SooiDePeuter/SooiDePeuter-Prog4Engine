@@ -1,8 +1,8 @@
 #include "PointsComponent.h"
 #include "GameObject.h"
 
-dae::PointsComponent::PointsComponent(GameObject* owner, int points)
-	:BaseComponent(owner),
+dae::PointsComponent::PointsComponent(GameObject* owner, int points, std::string* task)
+	:BaseComponent(owner, task),
 	m_Points{ points }
 {}
 

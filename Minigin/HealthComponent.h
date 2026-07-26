@@ -7,7 +7,7 @@ namespace dae
 	{
 	public:
 		
-		HealthComponent(GameObject* owner, int health);
+		HealthComponent(GameObject* owner, int health, std::string* task = nullptr);
 
 		void Update(float deltaTime) override;
 		void Render() const override;

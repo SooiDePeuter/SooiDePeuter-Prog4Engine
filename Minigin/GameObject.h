@@ -28,13 +28,7 @@ namespace dae
 		//dirty flag
 		bool m_isPositionOutOfSync{ false };
 
-		struct Observer
-		{
-			GameObject* GameObject;
-			std::vector<std::string>* Tasks; 
-		};
-
-		std::vector<Observer> m_Observers;
+		std::vector<BaseComponent*> m_Observers;
 
 		static float DeltaTime;
 
@@ -60,19 +54,11 @@ namespace dae
 		float GetTextureHeight() const;
 		void SetLocalPosition(float x, float y);
 
-		//---Componennt interface---
-		//Variadic template https://www.geeksforgeeks.org/cpp/variadic-function-templates-c/
+
 		template<typename T, typename... Args>
-		//Pass all parameters to the constructor without copying them
 		void AddComponent(Args&&... args)
 		{
 			static_assert(std::is_base_of_v<BaseComponent, T>, "T must derive from Component");
-
-			T* existingComponent = GetComponent<T>();
-			if (existingComponent != nullptr)
-			{
-				return;
-			}
 
 			auto component = std::make_unique<T>(this, std::forward<Args>(args)...);
 			m_components.emplace_back(std::move(component));
@@ -85,6 +71,22 @@ namespace dae
 			if (!component) return;
 			if (component->GetOwner() != this) return; //I don't want to be able to delete component from other GO
 			component->m_markedForRemoval = true;
+		}
+
+		template<typename T>
+		T* GetComponentByTask(const std::string* task = nullptr)
+		{
+			static_assert(std::is_base_of_v<BaseComponent, T>, "T must derive from Component");
+			for (std::unique_ptr<BaseComponent>& component : m_components)
+			{
+				//for every component I try to cast it to the type T, if cast success I return it
+				T* casted = dynamic_cast<T*>(component.get());
+				if (casted != nullptr && component.get()->GetTask() == task)
+				{
+					return casted;
+				}
+			}
+			return nullptr;
 		}
 
 		template<typename T>
@@ -147,10 +149,10 @@ namespace dae
 			SetLocalPosition(GetLocalTransform().GetPosition().x, GetLocalTransform().GetPosition().y + movementSpeed * DeltaTime);
 		}
 
-		void AddObserver(GameObject* observer, const std::string& task);
-		void RemoveObserver(GameObject* observer);
+		void AddObserver(BaseComponent* observer);
+		void RemoveObserver(BaseComponent* observer);
 		void PushEvent(GameObject* sender, const std::string& type);
-		void HandleEvent(GameObject* sender, const std::string& eventType, const std::vector<std::string>* observerTasks);
+		void HandleEvent(GameObject* sender, const std::string* eventType);
 
 		GameObject() = default;
 		~GameObject();

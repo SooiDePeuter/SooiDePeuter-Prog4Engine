@@ -26,7 +26,8 @@ namespace dae
 
 		TextComponent(GameObject* owner,
 			std::shared_ptr<Font> font,
-			const SDL_Color& color = { 255, 255, 255, 255 });
+			const SDL_Color& color = { 255, 255, 255, 255 },
+			std::string* task = nullptr);
 		~TextComponent() = default;
 		TextComponent(const TextComponent& other) = delete;
 		TextComponent(TextComponent&& other) = delete;

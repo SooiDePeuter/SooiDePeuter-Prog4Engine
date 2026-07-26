@@ -7,8 +7,8 @@
 #include <sstream>
 #include <iomanip>
 
-dae::FPSComponent::FPSComponent(GameObject* owner)
-    : BaseComponent(owner)
+dae::FPSComponent::FPSComponent(GameObject* owner, std::string* task)
+    : BaseComponent(owner, task)
 {
 
 }

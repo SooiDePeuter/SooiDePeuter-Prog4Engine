@@ -1,8 +1,8 @@
 #include "HealthComponent.h"
 #include "GameObject.h"
 
-dae::HealthComponent::HealthComponent(GameObject* owner, int health)
-	:BaseComponent(owner),
+dae::HealthComponent::HealthComponent(GameObject* owner, int health, std::string* task)
+	:BaseComponent(owner, task),
 	m_Health{health}
 {}
 

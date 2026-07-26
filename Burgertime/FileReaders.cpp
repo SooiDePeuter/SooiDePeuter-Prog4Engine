@@ -29,24 +29,27 @@ std::unique_ptr<dae::GameObject> dae::LevelReader::ReadLevelFile(const std::stri
 			levelPart->SetLocalPosition(xIndex * scale, yIndex * scale);
 			levelPart->SetTextureDimensions(scale, scale);
 
+			std::string levelPartTask1{"LadderBox"};
+			std::string levelPartTask2{"PlatformBox"};
+
 			switch (letter)
 			{
 			//|
 			case 124:
 				levelPart->SetTexture("Ladder.png");
-				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale);
+				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale, &levelPartTask1);
 				break;
 			//B
 			case 66:
 				levelPart->SetTexture("Ladder_Blue.png");
-				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale);
-				levelPart->AddComponent<dae::HitboxComponent>(0.f, 0.750f * scale, scale, 0.250f * scale);
+				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale, &levelPartTask1);
+				levelPart->AddComponent<dae::HitboxComponent>(0.f, 0.750f * scale, scale, 0.250f * scale, &levelPartTask2);
 				break;
 			//C
 			case 67:
 				levelPart->SetTexture("Ladder_Cyan.png");
-				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale);
-				levelPart->AddComponent<dae::HitboxComponent>(0.f, 0.750f * scale, scale, 0.250f * scale);
+				levelPart->AddComponent<dae::HitboxComponent>(0.375f * scale, 0.f, 0.250f * scale, scale, &levelPartTask1);
+				levelPart->AddComponent<dae::HitboxComponent>(0.f, 0.750f * scale, scale, 0.250f * scale, &levelPartTask2);
 				break;
 			//L
 			case 76:

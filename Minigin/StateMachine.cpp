@@ -11,9 +11,9 @@ void SingularStateMachine::Update(float deltaTime, GameObject* gameObject)
 	m_State->Update(deltaTime, gameObject);
 }
 
-void SingularStateMachine::CheckForNextState()
+void SingularStateMachine::CheckForNextState(GameObject* gameObject)
 {
-	State* newState = m_State->CheckForNextState();
+	State* newState = m_State->CheckForNextState(gameObject);
 
 	if (newState != nullptr)
 	{
@@ -36,9 +36,9 @@ void PushDownStateMachine::Update(float deltaTime, GameObject* gameObject)
 	m_States.top()->Update(deltaTime, gameObject);
 }
 
-void PushDownStateMachine::CheckForNextState()
+void PushDownStateMachine::CheckForNextState(GameObject* gameObject)
 {
-	State* newState = m_States.top()->CheckForNextState();
+	State* newState = m_States.top()->CheckForNextState(gameObject);
 
 	if (newState == nullptr)
 	{

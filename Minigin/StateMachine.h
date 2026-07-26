@@ -19,7 +19,7 @@ public:
 		OnExit();
 	}
 
-	virtual State* CheckForNextState() = 0;
+	virtual State* CheckForNextState(GameObject* gameObject) = 0;
 
 	//for actions that take longer than one frame. for single-frame actions, use OnEnter/OnExit
 	virtual void Update(float deltaTime, GameObject* gameObject) = 0;
@@ -43,7 +43,7 @@ class SingularStateMachine final
 public:
 	
 	void Update(float deltaTime, GameObject* gameObject);
-	void CheckForNextState();
+	void CheckForNextState(GameObject* gameObject);
 };
 
 class PushDownStateMachine final
@@ -56,5 +56,5 @@ class PushDownStateMachine final
 public:
 
 	void Update(float deltaTime, GameObject* gameObject);
-	void CheckForNextState();
+	void CheckForNextState(GameObject* gameObject);
 };

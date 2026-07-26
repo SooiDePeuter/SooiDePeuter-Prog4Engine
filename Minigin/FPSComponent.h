@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseComponent.h"
+#include "TextComponent.h"
 #include <string>
 
 namespace dae
@@ -9,7 +10,11 @@ namespace dae
     class FPSComponent final : public BaseComponent
     {
     public:
-        explicit FPSComponent(GameObject* owner);
+        explicit FPSComponent(GameObject* owner, std::string* task = nullptr);
+        ~FPSComponent()
+        {
+            delete m_text;
+        }
 
         void Update(float deltaTime) override;
         void Render() const override;
