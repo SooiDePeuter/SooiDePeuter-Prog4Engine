@@ -35,8 +35,7 @@ add_library(${LIBRARY_NAME} STATIC
 
 add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Burgertime/Main.cpp
-  Burgertime/FileReaders.cpp
-  Burgertime/States.cpp)
+  Burgertime/FileReaders.cpp)
 
 # enable c++20 features
 target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_20)

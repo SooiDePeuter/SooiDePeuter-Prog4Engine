@@ -23,8 +23,8 @@ namespace dae
             m_Height = owner->GetTextureHeight();
         }
 
-        explicit HitboxComponent(GameObject* owner, float posX, float posY, float width, float height)
-            :BaseComponent(owner), m_PosX{ posX }, m_PosY{ posY }, m_Width{ width }, m_Height{ height }
+        explicit HitboxComponent(GameObject* owner, float posX, float posY, float width, float height, std::string* task = nullptr)
+            :BaseComponent(owner, task), m_PosX{ posX }, m_PosY{ posY }, m_Width{ width }, m_Height{ height }
         {
         }
 

@@ -54,16 +54,6 @@ static void load()
 	player1->AddComponent<dae::HitboxComponent>(0.f, 0.f, 32.f, 32.f);
 	player1->movementSpeed = 100.f;
 
-
-	//load decoy 2
-	auto player2 = std::make_unique<dae::GameObject>();
-	player2->SetTexture("Decoy_Sad.png");
-	player2->SetLocalPosition(450, 200);
-	player2->AddComponent<dae::HealthComponent>(3);
-	player2->AddComponent<dae::PointsComponent>(0);
-	player2->movementSpeed = 200.f;
-
-
 	//load a font using the provided texture
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 
@@ -79,26 +69,6 @@ static void load()
 	fps->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255));
 	fps->GetComponent<dae::TextComponent>()->AddTextPart(0, "[INVALID] FPS");
 	fps->AddComponent<dae::FPSComponent>();
-
-	//load hp1 object
-	auto hp1 = std::make_unique<dae::GameObject>();
-	hp1->SetLocalPosition(20, 160);
-	std::string hp1Task{"UpdateHealth"};
-	hp1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255), &hp1Task);
-	hp1->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 1 Health: ");
-	hp1->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player1->GetComponent<dae::HealthComponent>()->GetHealth()));
-
-	//load points1 object
-	auto points1 = std::make_unique<dae::GameObject>();
-	points1->SetLocalPosition(20, 240);
-	std::string points1Task{ "UpdatePoints" };
-	points1->AddComponent<dae::TextComponent>(font, SDL_Color(255, 255, 255, 255), &points1Task);
-	points1->GetComponent<dae::TextComponent>()->AddTextPart(0, "Player 1 Points: ");
-	points1->GetComponent<dae::TextComponent>()->AddTextPart(1, std::to_string(player1->GetComponent<dae::PointsComponent>()->GetPoints()));
-
-	//events
-	player1.get()->AddObserver(hp1->GetComponent<dae::TextComponent>());
-	player1.get()->AddObserver(points1->GetComponent<dae::TextComponent>());
 
 	//commands
 	dae::InputManager::GetInstance().BindControllerCommand(
@@ -137,8 +107,6 @@ static void load()
 	scene.Add(player1);
 	scene.Add(topText);
 	scene.Add(fps);
-	scene.Add(hp1);
-	scene.Add(points1);
 }
 
 int main(int, char*[]) 
